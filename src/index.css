@@ -105,7 +105,7 @@ button {
 }
 
 .home-subtitle {
-  margin: 0 0 28px;
+  margin: 0 0 18px;
   color: #50645a;
   font-size: 1.08rem;
 }
@@ -2477,4 +2477,474 @@ button {
     display: inline-block;
     margin-top: 6px;
   }
+}
+
+/* =====================================================
+   FLOCK PROGRESSION
+   ===================================================== */
+
+.flock-progress-card {
+  margin: 0 0 14px;
+  padding: 12px 14px 11px;
+  border: 1px solid rgba(41, 79, 69, 0.15);
+  border-radius: 18px;
+  background: rgba(251, 247, 237, 0.55);
+  text-align: left;
+  backdrop-filter: blur(6px);
+}
+
+.flock-progress-topline {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  color: var(--dark-green);
+  font-size: 0.78rem;
+}
+
+.flock-progress-topline span {
+  font-weight: 800;
+}
+
+.flock-progress-topline strong {
+  white-space: nowrap;
+  font-size: 0.72rem;
+}
+
+.flock-progress-track {
+  height: 7px;
+  margin: 9px 0 7px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: rgba(41, 79, 69, 0.12);
+}
+
+.flock-progress-fill {
+  height: 100%;
+  border-radius: inherit;
+  background: var(--green);
+  transition: width 400ms ease;
+}
+
+.flock-progress-card small {
+  display: block;
+  color: #5f7067;
+  font-size: 0.68rem;
+  line-height: 1.35;
+}
+
+.practice-flock-count {
+  width: fit-content;
+  margin: -5px 0 14px;
+  padding: 7px 11px;
+  border-radius: 999px;
+  background: #e5ead8;
+  color: var(--green);
+  font-size: 0.72rem;
+  font-weight: 800;
+}
+
+.flight-rating {
+  width: fit-content;
+  margin: 0 auto 8px !important;
+  padding: 7px 12px;
+  border-radius: 999px;
+  background: #e8eadc;
+  color: var(--green) !important;
+  font-size: 0.78rem;
+  font-weight: 800;
+}
+
+.unlock-card {
+  display: grid;
+  grid-template-columns: 118px 1fr;
+  align-items: center;
+  column-gap: 16px;
+  row-gap: 8px;
+  margin: 20px 0 18px;
+  padding: 13px 16px 13px 10px;
+  border: 1px solid rgba(41, 79, 69, 0.14);
+  border-radius: 22px;
+  background: #dfe7cf;
+  text-align: left;
+  box-shadow: 0 9px 22px rgba(36, 51, 46, 0.08);
+  animation: unlock-in 500ms cubic-bezier(.2,.85,.3,1.15);
+}
+
+@keyframes unlock-in {
+  from {
+    opacity: 0;
+    transform: translateY(14px) scale(0.97);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.unlock-card .eyebrow {
+  grid-column: 1 / -1;
+  margin: 0 0 -2px 8px;
+  color: var(--rust);
+}
+
+.unlock-bird-art {
+  min-height: 84px;
+  display: grid;
+  place-items: center;
+  overflow: visible;
+  justify-self: start;
+}
+
+.unlock-bird-art .bird-small {
+  transform: scale(0.5);
+  transform-origin: center;
+}
+
+.unlock-copy {
+  padding-left: 10px;
+  min-width: 0;
+}
+
+.unlock-copy small {
+  color: var(--muted);
+  font-size: 0.68rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-weight: 700;
+}
+
+.unlock-copy h3 {
+  margin: 2px 0 5px;
+  font-family: "Fraunces", serif;
+  color: var(--dark-green);
+  font-size: 1.35rem;
+  line-height: 1.05;
+}
+
+.unlock-copy p {
+  margin: 0;
+  color: var(--green);
+  font-size: 0.78rem;
+  font-weight: 700;
+}
+
+.flock-complete-note {
+  margin: 18px 0 !important;
+  padding: 11px 13px;
+  border-radius: 16px;
+  background: #e5ead8;
+  color: var(--green) !important;
+  font-size: 0.78rem;
+  font-weight: 800;
+}
+
+@media (max-width: 520px) {
+  .flock-progress-topline {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 2px;
+  }
+
+  .unlock-card {
+    grid-template-columns: 108px 1fr;
+    column-gap: 12px;
+  }
+
+  .unlock-copy {
+    padding-left: 6px;
+  }
+}
+
+
+/* =====================================================
+   BIRDSONG FLOCK EXPANSION — 6 NEW SPECIES
+   ===================================================== */
+
+/* RED-BELLIED WOODPECKER */
+.bird-red-bellied-woodpecker .bird-head {
+  width: 67px;
+  height: 64px;
+  left: 84px;
+  top: 30px;
+}
+
+.bird-red-bellied-woodpecker .bird-body {
+  width: 108px;
+  height: 88px;
+  left: 42px;
+  top: 58px;
+}
+
+.bird-red-bellied-woodpecker .bird-belly {
+  display: block;
+  width: 62px;
+  height: 55px;
+  right: 0;
+  bottom: 0;
+  border-radius: 50%;
+  background: #ded7c6;
+}
+
+.bird-red-bellied-woodpecker .bird-wing {
+  background:
+    repeating-linear-gradient(
+      105deg,
+      #313736 0 8px,
+      #e8e2d5 8px 13px
+    );
+}
+
+.bird-red-bellied-woodpecker .bird-beak {
+  border-left-width: 34px;
+  right: -31px;
+}
+
+/* BARRED OWL */
+.bird-barred-owl .bird-head {
+  width: 88px;
+  height: 82px;
+  left: 62px;
+  top: 25px;
+  border-radius: 45% 45% 48% 48%;
+}
+
+.bird-barred-owl .bird-body {
+  width: 112px;
+  height: 106px;
+  left: 43px;
+  top: 62px;
+  border-radius: 50% 48% 52% 50%;
+}
+
+.bird-barred-owl .bird-wing {
+  width: 68px;
+  height: 67px;
+  background:
+    repeating-linear-gradient(
+      0deg,
+      #705b49 0 8px,
+      #987d64 8px 13px
+    );
+}
+
+.bird-barred-owl .bird-tail {
+  left: 28px;
+  top: 112px;
+  border-top-width: 12px;
+  border-bottom-width: 12px;
+  border-right-width: 48px;
+  transform: rotate(-5deg);
+}
+
+.bird-barred-owl .bird-beak {
+  right: -11px;
+  top: 42px;
+  border-top-width: 7px;
+  border-bottom-width: 7px;
+  border-left-width: 17px;
+}
+
+.bird-barred-owl .bird-leg-one,
+.bird-barred-owl .bird-leg-two {
+  top: 148px;
+  height: 20px;
+}
+
+/* KILLDEER */
+.bird-killdeer .bird-body {
+  width: 117px;
+  height: 77px;
+  left: 34px;
+  top: 68px;
+}
+
+.bird-killdeer .bird-head {
+  width: 61px;
+  height: 58px;
+  left: 91px;
+  top: 42px;
+}
+
+.bird-killdeer .bird-belly {
+  display: block;
+  width: 75px;
+  height: 49px;
+  right: 0;
+  bottom: 0;
+  border-radius: 50%;
+  background: #eee7d6;
+}
+
+.bird-killdeer .bird-throat {
+  display: block;
+  width: 65px;
+  height: 10px;
+  right: 4px;
+  top: 13px;
+  border-radius: 999px;
+  background: #393d3a;
+  transform: rotate(-2deg);
+}
+
+.bird-killdeer .bird-beak {
+  border-left-width: 31px;
+}
+
+.bird-killdeer .bird-leg-one,
+.bird-killdeer .bird-leg-two {
+  height: 38px;
+  top: 133px;
+}
+
+/* EASTERN TOWHEE */
+.bird-eastern-towhee .bird-belly {
+  display: block;
+  width: 63px;
+  height: 61px;
+  right: 0;
+  bottom: 0;
+  border-radius: 50%;
+  background: #efe8d7;
+}
+
+.bird-eastern-towhee .bird-wing {
+  width: 67px;
+  height: 55px;
+  background: #a85b43;
+}
+
+.bird-eastern-towhee .bird-wing::after {
+  content: "";
+  position: absolute;
+  width: 34px;
+  height: 6px;
+  left: 12px;
+  top: 27px;
+  border-radius: 999px;
+  background: rgba(238, 232, 215, 0.9);
+  transform: rotate(-8deg);
+}
+
+/* NORTHERN MOCKINGBIRD */
+.bird-northern-mockingbird .bird-body {
+  width: 115px;
+  height: 84px;
+  left: 35px;
+  top: 62px;
+}
+
+.bird-northern-mockingbird .bird-head {
+  width: 65px;
+  height: 61px;
+  left: 88px;
+  top: 38px;
+}
+
+.bird-northern-mockingbird .bird-tail {
+  left: -6px;
+  border-right-width: 97px;
+  transform: rotate(-8deg);
+}
+
+.bird-northern-mockingbird .bird-wing {
+  width: 75px;
+  height: 51px;
+}
+
+.bird-northern-mockingbird .bird-wing::after {
+  content: "";
+  position: absolute;
+  width: 47px;
+  height: 8px;
+  left: 10px;
+  top: 22px;
+  border-radius: 999px;
+  background: #e9e6da;
+  transform: rotate(-8deg);
+}
+
+/* CAROLINA CHICKADEE */
+.bird-carolina-chickadee .bird-body {
+  width: 98px;
+  height: 80px;
+  left: 46px;
+  top: 61px;
+}
+
+.bird-carolina-chickadee .bird-head {
+  width: 65px;
+  height: 63px;
+  left: 84px;
+  top: 33px;
+}
+
+.bird-carolina-chickadee .bird-cheek {
+  display: block;
+  width: 31px;
+  height: 28px;
+  right: 1px;
+  top: 22px;
+  background: #efede3;
+  border-radius: 50%;
+}
+
+.bird-carolina-chickadee .bird-throat {
+  display: block;
+  width: 25px;
+  height: 24px;
+  right: -1px;
+  top: 15px;
+  border-radius: 45% 45% 55% 55%;
+  background: #252929;
+}
+
+.bird-carolina-chickadee .bird-belly {
+  display: block;
+  width: 58px;
+  height: 48px;
+  right: 2px;
+  bottom: 2px;
+  border-radius: 50%;
+  background: #d9d2bd;
+  opacity: 0.8;
+}
+
+.bird-carolina-chickadee .bird-wing::after {
+  content: "";
+  position: absolute;
+  width: 35px;
+  height: 4px;
+  left: 13px;
+  top: 22px;
+  border-radius: 999px;
+  background: rgba(229, 226, 213, 0.75);
+  transform: rotate(-7deg);
+}
+.unlock-listen-button {
+  margin-top: 10px;
+  border: 1px solid rgba(41, 79, 69, 0.18);
+  border-radius: 999px;
+  background: rgba(251, 247, 237, 0.72);
+  color: var(--green);
+  padding: 8px 12px;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 0.72rem;
+  font-weight: 800;
+  cursor: pointer;
+  transition:
+    transform 160ms ease,
+    background 160ms ease;
+}
+
+.unlock-listen-button:hover {
+  transform: translateY(-1px);
+  background: var(--paper);
+}
+
+.unlock-listen-button span {
+  font-size: 0.9rem;
 }

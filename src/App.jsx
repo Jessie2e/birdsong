@@ -102,18 +102,122 @@ const audioCredits = [
       "https://commons.wikimedia.org/wiki/File:American_Crow.ogg",
     license: "Public Domain",
   },
+  {
+    bird: "Red-bellied Woodpecker",
+    creator: "Jonathon Jongsma",
+    source: "Xeno-canto via Wikimedia Commons",
+    sourceUrl:
+      "https://commons.wikimedia.org/wiki/File:Melanerpes_carolinus_-_Red-bellied_Woodpecker_-_XC71728.ogg",
+    license: "CC BY-SA 3.0",
+    licenseUrl:
+      "https://creativecommons.org/licenses/by-sa/3.0/",
+    edited: false,
+  },
+  {
+    bird: "Barred Owl",
+    creator: "Tom Cosburn",
+    source: "British Library via Wikimedia Commons",
+    sourceUrl:
+      "https://commons.wikimedia.org/wiki/File:Barred_Owl_(Strix_varia)_(W1CDR0000351_BD27).ogg",
+    license: "CC BY 4.0",
+    licenseUrl:
+      "https://creativecommons.org/licenses/by/4.0/",
+    edited: false,
+  },
+  {
+    bird: "Eastern Towhee",
+    creator: "Jonathon Jongsma",
+    source: "Xeno-canto via Wikimedia Commons",
+    sourceUrl:
+      "https://commons.wikimedia.org/wiki/File:Pipilo_erythrophthalmus_-_Eastern_Towhee_-_XC81298.ogg",
+    license: "CC BY-SA 3.0",
+    licenseUrl:
+      "https://creativecommons.org/licenses/by-sa/3.0/",
+    edited: false,
+  },
+  {
+    bird: "Killdeer",
+    creator: "U.S. National Park Service",
+    source: "Wikimedia Commons",
+    sourceUrl:
+      "https://commons.wikimedia.org/wiki/File:Charadrius_vociferus.ogg",
+    license: "Public Domain",
+  },
+  {
+    bird: "Northern Mockingbird",
+    creator: "David Illig",
+    source: "Wikimedia Commons",
+    sourceUrl:
+      "https://commons.wikimedia.org/wiki/File:Mimus_polyglottos_Northern_Mockingbird.ogg",
+    license: "CC BY-SA 3.0",
+    licenseUrl:
+      "https://creativecommons.org/licenses/by-sa/3.0/",
+    edited: false,
+  },
+  {
+    bird: "Carolina Chickadee",
+    creator: "G. McGrane",
+    source: "Wikimedia Commons",
+    sourceUrl:
+      "https://commons.wikimedia.org/wiki/File:Carolina_Chickadee.ogg",
+    license: "Public Domain",
+  },
 ];
 
 const GUESS_HISTORY_KEY = "birdsong-guess-history-v1";
 const RESET_AT_KEY = "birdsong-reset-at-v1";
-const DISCOVERED_KEY = "birdsong-discovered-v1";
+const DISCOVERED_KEY = "birdsong-discovered-v3";
 const SPOTTED_KEY = "birdsong-spotted-v1";
 
 const starterBirds = [
   "cardinal",
   "robin",
   "bluejay",
+  "mourning-dove",
 ];
+
+const unlockOrder = [
+  "cardinal",
+  "robin",
+  "bluejay",
+  "mourning-dove",
+  "american-crow",
+  "carolina-wren",
+  "chickadee",
+  "titmouse",
+  "eastern-bluebird",
+  "nuthatch",
+  "house-finch",
+  "red-bellied-woodpecker",
+  "barred-owl",
+  "killdeer",
+  "eastern-towhee",
+  "northern-mockingbird",
+  "carolina-chickadee",
+];
+
+function getFlockRank(count) {
+  if (count >= birds.length) {
+    return { name: "Birdsong Naturalist", icon: "🦅" };
+  }
+
+  if (count >= 8) {
+    return { name: "Song Spotter", icon: "🌳" };
+  }
+
+  if (count >= 5) {
+    return { name: "Backyard Birder", icon: "🪶" };
+  }
+
+  return { name: "Hatchling", icon: "🌱" };
+}
+
+function getFlightRating(score) {
+  if (score === 10) return "🪶🪶🪶 Perfect flight";
+  if (score >= 8) return "🪶🪶 Sharp ears";
+  if (score >= 5) return "🪶 Getting the hang of it";
+  return "🌱 Learning";
+}
 
 function readStoredJSON(key, fallback) {
   try {
@@ -222,7 +326,13 @@ function HomeScreen({
   onNearby,
   onGuide,
   onCredits,
+  discoveredBirds,
 }) {
+  const discoveredCount = discoveredBirds.length;
+  const rank = getFlockRank(discoveredCount);
+  const progress = Math.round(
+    (discoveredCount / birds.length) * 100
+  );
   return (
     <main className="home-screen screen">
       <div className="cloud cloud-one" />
@@ -240,6 +350,22 @@ function HomeScreen({
         <p className="home-subtitle">
           Can you name that bird?
         </p>
+
+        <section className="flock-progress-card" aria-label="Flock progress">
+          <div className="flock-progress-topline">
+            <span>{rank.icon} {rank.name}</span>
+            <strong>{discoveredCount}/{birds.length} species</strong>
+          </div>
+
+          <div className="flock-progress-track" aria-hidden="true">
+            <div
+              className="flock-progress-fill"
+              style={{ width: `${progress}%` }}
+            />
+          </div>
+
+          <small>Finish a 10-bird flight to welcome a new bird.</small>
+        </section>
 
         <button
           className="primary-button"
@@ -303,12 +429,13 @@ function HomeScreen({
 function GameScreen({
   onHome,
   onGuess,
-  onDiscover,
+  onUnlockBird,
+  unlockBird = null,
   birdPool = birds,
   modeLabel = null,
 }) {
   const [rounds, setRounds] = useState(() =>
-    createRounds(10, birdPool)
+    createRounds(10, birdPool, birdPool)
   );
 
   const [roundIndex, setRoundIndex] =
@@ -322,18 +449,15 @@ function GameScreen({
   const [finished, setFinished] =
     useState(false);
 
+  const [newlyUnlocked, setNewlyUnlocked] =
+    useState(null);
+
   const audioRef = useRef(null);
 
   const [isPlaying, setIsPlaying] =
     useState(false);
 
   const currentRound = rounds[roundIndex];
-
-  useEffect(() => {
-    if (currentRound?.correct) {
-      onDiscover(currentRound.correct.id);
-    }
-  }, [roundIndex]);
 
   function stopCurrentAudio() {
     if (audioRef.current) {
@@ -386,7 +510,41 @@ function GameScreen({
       setIsPlaying(false);
     });
   }
+function toggleUnlockedBirdSound() {
+  if (!newlyUnlocked?.audio) return;
 
+  if (audioRef.current) {
+    stopCurrentAudio();
+    return;
+  }
+
+  const audio = new Audio(newlyUnlocked.audio);
+
+  audio.volume = 0.85;
+
+  audioRef.current = audio;
+  setIsPlaying(true);
+
+  audio.onended = () => {
+    audioRef.current = null;
+    setIsPlaying(false);
+  };
+
+  audio.onerror = () => {
+    audioRef.current = null;
+    setIsPlaying(false);
+  };
+
+  audio.play().catch((error) => {
+    console.error(
+      "Could not play unlocked bird audio:",
+      error
+    );
+
+    audioRef.current = null;
+    setIsPlaying(false);
+  });
+}
   /*
     Stop the previous bird automatically
     whenever the round changes.
@@ -439,6 +597,11 @@ function GameScreen({
       roundIndex ===
       rounds.length - 1
     ) {
+      if (unlockBird && onUnlockBird) {
+        setNewlyUnlocked(unlockBird);
+        onUnlockBird(unlockBird.id);
+      }
+
       setFinished(true);
       return;
     }
@@ -453,11 +616,12 @@ function GameScreen({
   function restart() {
     stopCurrentAudio();
 
-    setRounds(createRounds(10, birdPool));
+    setRounds(createRounds(10, birdPool, birdPool));
     setRoundIndex(0);
     setSelectedBird(null);
     setScore(0);
     setFinished(false);
+    setNewlyUnlocked(null);
   }
 
   function goHome() {
@@ -486,6 +650,10 @@ function GameScreen({
 
           <h2>{score}/10</h2>
 
+          <p className="flight-rating">
+            {getFlightRating(score)}
+          </p>
+
           <p>
             {score >= 8
               ? "Well hello, birder."
@@ -493,6 +661,36 @@ function GameScreen({
               ? "You're getting the hang of this."
               : "Every birder starts somewhere."}
           </p>
+
+          {newlyUnlocked && (
+            <section className="unlock-card" aria-live="polite">
+              <p className="eyebrow">NEW BIRD!</p>
+
+              <div className="unlock-bird-art">
+                <BirdIllustration bird={newlyUnlocked} small />
+              </div>
+
+              <div className="unlock-copy">
+  <small>joined your flock</small>
+  <h3>{newlyUnlocked.commonName}</h3>
+  <p>♪ {newlyUnlocked.mnemonic}</p>
+
+  <button
+    className="unlock-listen-button"
+    onClick={toggleUnlockedBirdSound}
+  >
+    <span>{isPlaying ? "■" : "♪"}</span>
+    {isPlaying ? "Stop call" : "Hear this bird"}
+  </button>
+</div>
+            </section>
+          )}
+
+          {!newlyUnlocked && !modeLabel && (
+            <p className="flock-complete-note">
+              🦅 Your whole Birdsong flock is unlocked.
+            </p>
+          )}
 
           <button
             className="primary-button"
@@ -703,7 +901,7 @@ function GameScreen({
   );
 }
 
-function PracticeScreen({ onHome }) {
+function PracticeScreen({ onHome, birdPool }) {
   const audioRef = useRef(null);
   const [activeBirdId, setActiveBirdId] =
     useState(null);
@@ -795,13 +993,17 @@ function PracticeScreen({ onHome }) {
         <h2>Meet the flock.</h2>
 
         <p>
-          Tap a bird to hear its call. Tap it
-          again to stop, or choose another bird.
+          Tap a bird to hear its call. Your practice perch grows
+          each time you finish a 10-bird flight.
         </p>
       </header>
 
+      <div className="practice-flock-count">
+        {birdPool.length} of {birds.length} birds in your flock
+      </div>
+
       <div className="collection-grid">
-        {birds.map((bird) => {
+        {birdPool.map((bird) => {
           const isPlaying =
             activeBirdId === bird.id;
 
@@ -1370,8 +1572,8 @@ function FieldGuideScreen({
                     <div className="locked-copy">
                       <h3>Undiscovered</h3>
                       <p>
-                        Meet this bird in a game
-                        to add it to your guide.
+                        Complete a flight to welcome
+                        this bird into your flock.
                       </p>
                     </div>
                   )}
@@ -1623,6 +1825,19 @@ export default function App() {
     );
   }, [spottedBirds]);
 
+  const unlockedBirds = birds.filter((bird) =>
+    discoveredBirds.includes(bird.id)
+  );
+
+  const nextUnlockBird = unlockOrder
+    .map((birdId) =>
+      birds.find((bird) => bird.id === birdId)
+    )
+    .find(
+      (bird) =>
+        bird && !discoveredBirds.includes(bird.id)
+    );
+
   function recordGuess(
     birdId,
     correct
@@ -1637,7 +1852,7 @@ export default function App() {
     ]);
   }
 
-  function discoverBird(birdId) {
+  function unlockBird(birdId) {
     setDiscoveredBirds((current) =>
       current.includes(birdId)
         ? current
@@ -1668,7 +1883,9 @@ export default function App() {
           setScreen("home")
         }
         onGuess={recordGuess}
-        onDiscover={discoverBird}
+        onUnlockBird={unlockBird}
+        unlockBird={nextUnlockBird || null}
+        birdPool={unlockedBirds}
       />
     );
   }
@@ -1679,6 +1896,7 @@ export default function App() {
         onHome={() =>
           setScreen("home")
         }
+        birdPool={unlockedBirds}
       />
     );
   }
@@ -1707,7 +1925,6 @@ export default function App() {
       <GameScreen
         onHome={() => setScreen("nearby")}
         onGuess={recordGuess}
-        onDiscover={discoverBird}
         birdPool={nearbyPool}
         modeLabel="NEARBY"
       />
@@ -1759,6 +1976,7 @@ export default function App() {
       onCredits={() =>
         setScreen("credits")
       }
+      discoveredBirds={discoveredBirds}
     />
   );
 }
