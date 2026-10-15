@@ -1,0 +1,87 @@
+import { useEffect, useRef, useState } from 'react';
+import { birds } from './data/birds';
+import { recognition, shuffle } from './progress';
+import {arrangementEligible} from './world-progress';
+import {audioCredits} from './audio-credits';
+import PhraseWorkshop from './PhraseWorkshop';
+import BirdMemory from './BirdMemory';
+import WorldIcon from './WorldIcon';
+import useRecordings from './useRecordings';
+import { StudioAudio, studioUnlocked } from './studio-audio';
+
+const challengeVoices = ['cardinal', 'bluejay', 'robin', 'carolina-wren'].map(id => birds.find(bird => bird.id === id));
+const catalogVoices = [...challengeVoices,...birds.filter(b=>!challengeVoices.some(v=>v.id===b.id))];
+const KEY = 'birdsong-studio-chorus-v1';
+const presets = Object.fromEntries(challengeVoices.map((bird, index) => [`lane-${index}`, {birdId:bird.id, step:index * 2, pitch:0, start:index === 1 ? 1 : 0, length:2.5, volume:.55, enabled:index < 2}]));
+const MIX_KEY = 'birdsong-studio-mixes-v1';
+function savedMixes() {try {const value=JSON.parse(localStorage.getItem(MIX_KEY)||'[]'); return Array.isArray(value) ? value.filter(m=>m && typeof m.name === 'string' && m.tracks && typeof m.tracks === 'object').slice(0,12) : [];} catch {return [];}}
+function savedUnlock() { try { return localStorage.getItem(KEY) === 'earned'; } catch { return false; } }
+function rounds() { return shuffle([...challengeVoices, challengeVoices[0], challengeVoices[1]]).map((bird, i) => ({bird,start:i % 2 ? 6 : bird.id === 'bluejay' ? 1 : 0})); }
+
+export default function BirdsongStudio({onHome, BirdArt, history, discoveredBirds = [], onMilestone}) {
+  const [earned, setEarned] = useState(savedUnlock);
+  const unlocked = studioUnlocked(earned, history, recognition);
+  const [tracks, setTracks] = useState(presets), settings = useRef(tracks);
+  const [tempo, setTempo] = useState(100), [beat, setBeat] = useState('none');
+  const [playing, setPlaying] = useState(false), [busy, setBusy] = useState(false), [error, setError] = useState('');
+  const [pulses, setPulses] = useState([]);
+  const [mode, setMode] = useState('home'), [questions, setQuestions] = useState(rounds), [index, setIndex] = useState(0);
+  const [answer, setAnswer] = useState(null), [score, setScore] = useState(0), [heard, setHeard] = useState(false), [finished, setFinished] = useState(false);
+  const [mixes,setMixes] = useState(savedMixes), [mixName,setMixName] = useState('My birdsong'), [savedMessage,setSavedMessage] = useState('');
+  const {clips} = useRecordings();
+  const voices=[...catalogVoices,...clips.map(clip=>({id:`clip:${clip.id}`,birdId:clip.birdId,commonName:clip.name,audio:clip.audio,duration:clip.duration,isSaved:true,attribution:clip.attribution}))];
+  const availableVoices = voices.filter((voice,i)=>voice.isSaved || discoveredBirds.includes(voice.id) || i < 2 || (i < 4 && unlocked) || recognition(history,voice.id));
+  const heardArrangement=useRef(''),loopCandidate=useRef('');
+  const fingerprint=JSON.stringify({tracks,tempo,beat});
+  useEffect(()=>{if(!playing)return;if(pulses.some(p=>p.step===7))loopCandidate.current=fingerprint;if(pulses.some(p=>p.step===0)&&loopCandidate.current===fingerprint)heardArrangement.current=fingerprint;},[playing,pulses,fingerprint]);
+  const lanes = Object.entries(tracks).map(([id,track])=>({...voices.find(v=>v.id === track.birdId)||{commonName:'Missing saved sound',audio:null},id}));
+  function chooseSource(id,value){const source=voices.find(v=>v.id===value);const next={...settings.current,[id]:{...settings.current[id],birdId:value,start:0,length:source?.duration||2.5,pitch:0}};settings.current=next;setTracks(next);}
+  function section(value){stop();setMode(value);setError('');}
+  function deleteMix(name){const next=mixes.filter(m=>m.name!==name);try{localStorage.setItem(MIX_KEY,JSON.stringify(next));setMixes(next);setSavedMessage('Song deleted from this device.');}catch{setError('Couldn’t delete this song.');}}
+  function saveMix() {const name=mixName.trim().slice(0,60);if(!name){setError('Give your song a name first.');return;}const next=[{name,tempo,beat,tracks:settings.current},...mixes.filter(m=>m.name !== name)].slice(0,12);try{localStorage.setItem(MIX_KEY,JSON.stringify(next));setMixes(next);setSavedMessage(`Saved “${name}” on this device.`);if(arrangementEligible(settings.current)&&heardArrangement.current===fingerprint)onMilestone?.('first-arrangement');}catch{setError('This browser couldn’t save your song.');}}
+  function openMix(name) {const mix=mixes.find(m=>m.name===name);if(!mix)return;stop();const next=Object.fromEntries(Object.entries(presets).map(([id,fallback])=>{const t=mix.tracks[id]||fallback;return [id,{birdId:voices.some(v=>v.id===t.birdId)?t.birdId:fallback.birdId,step:Math.max(0,Math.min(7,Number(t.step)||0)),pitch:Math.max(-12,Math.min(12,Number(t.pitch)||0)),start:Math.max(0,Math.min(12,Number(t.start)||0)),length:Math.max(.5,Math.min(60,Number(t.length)||2.5)),volume:Math.max(0,Math.min(.8,Number(t.volume)||0)),enabled:!!t.enabled&&voices.some(v=>v.id===t.birdId)}];}));settings.current=next;setTracks(next);setTempo([80,100,120].includes(mix.tempo)?mix.tempo:100);setBeat(['none','woodland','soft'].includes(mix.beat)?mix.beat:'none');setMixName(mix.name);setMode('mix');if(Object.values(mix.tracks).some(t=>!voices.some(v=>v.id===t.birdId)))setError('A saved source is missing. Its lane is muted; choose another sound.');setSavedMessage(`Opened “${mix.name}”.`);}
+  const engine = useRef(null), version = useRef(0);
+  useEffect(() => () => { version.current++; engine.current?.close(); engine.current = null; }, []);
+  function audio() { if (!engine.current) engine.current = new StudioAudio(setPulses); return engine.current; }
+  function stop() { loopCandidate.current=''; version.current++; engine.current?.stop(); setPlaying(false); setBusy(false); }
+  function change(id, key, value) { const next = {...settings.current,[id]:{...settings.current[id],[key]:value}}; settings.current = next; setTracks(next); }
+  async function preview(bird, start, length = 2.5, pitch = 0) {
+    stop(); const task = version.current; setBusy(true); setError('');
+    try { await audio().prepare([bird]); if (task !== version.current) return; await audio().preview(bird,start,length,pitch); if (task === version.current && mode === 'learn') setHeard(true); }
+    catch { if (task === version.current) setError('This voice couldn’t load. Please try again.'); }
+    finally { if (task === version.current) setBusy(false); }
+  }
+  async function play() {
+    if (playing || busy) { stop(); return; }
+    const available = lanes.filter(lane=>availableVoices.some(v=>v.id === tracks[lane.id].birdId));
+    if (!available.some(bird => settings.current[bird.id].enabled)) { setError('Switch on at least one bird to start your song.'); return; }
+    const task = ++version.current; setBusy(true); setError('');
+    try { const player = audio(); await player.prepare(available); if (task !== version.current) return; await player.start(available,tempo,beat,()=>settings.current); if (task !== version.current) {player.stop();return;} setPlaying(true); }
+    catch { if (task === version.current) setError('Your song couldn’t start. Try again.'); }
+    finally { if (task === version.current) setBusy(false); }
+  }
+  function begin() { stop(); setMode('learn'); setQuestions(rounds()); setIndex(0); setScore(0); setAnswer(null); setHeard(false); setFinished(false); setError(''); }
+  function choose(id) { if (!heard || answer) return; stop(); setAnswer(id); if (id === questions[index].bird.id) setScore(value => value + 1); }
+  function next() {
+    stop(); if (index === 5) { setFinished(true); if (score >= 5) {setEarned(true); onMilestone?.('phrase-challenge'); try {localStorage.setItem(KEY,'earned');} catch {setError('Unlocked for this visit. This browser couldn’t save your reward.');}} }
+    else {setIndex(value => value + 1); setAnswer(null); setHeard(false);}
+  }
+  const current = questions[index];
+  return <main className="screen studio-screen">
+    <button className="back-button" onClick={() => {stop();onHome();}}>← Home</button>
+    <header className="section-header"><p className="eyebrow">BIRDSONG, YOUR WAY.</p><h1>Make Music.</h1><p>Your collected voices. A rhythm of your own.</p></header>
+    <nav className="studio-tabs music-nav" aria-label="Music sections">{[['home','Music home'],['mix','DJ station'],['workshop','Phrase workshop'],['songs','My saved songs'],['memory','Bird Memory']].map(([id,label])=><button key={id} aria-pressed={mode===id} onClick={()=>section(id)}>{label}</button>)}</nav>
+    {error && <p role="alert">{error}</p>}
+    {mode === 'home' ? <><div className="music-stations">{[['mix','music','DJ station','Arrange birds and saved phrases over a beat.'],['workshop','sound','Phrase workshop','Open a recording, trim, change volume and pitch, then save a named phrase.'],['songs','book','My saved songs','Reopen your saved arrangements and make something new.'],['memory','memory','Bird Memory','Watch the birds light up. Echo their sound pattern.']].map(([id,icon,title,description])=><button key={id} onClick={()=>section(id)}><WorldIcon name={icon}/><h2>{title}</h2><p>{description}</p><span>Open →</span></button>)}</div><p className="world-small-note">Your saved calls are available in both the DJ station and phrase workshop. Named phrases save edited audio; songs save arrangements. Everything stays on this device.</p></> : mode === 'workshop' ? <PhraseWorkshop BirdArt={BirdArt} discoveredBirds={discoveredBirds} onDJ={()=>section('mix')}/> : mode === 'memory' ? <BirdMemory BirdArt={BirdArt}/> : mode === 'songs' ? <section className="world-panel"><h2>My saved songs · {mixes.length}</h2><p>These are editable arrangements of your birds, phrases, tempo and beat. Open one in the DJ station, then press Play.</p><div className="music-saved-grid">{mixes.map(m=><article key={m.name}><h3>{m.name}</h3><p>{m.tempo} BPM · {m.beat==='none'?'Just birds':m.beat==='woodland'?'Woodland tap':'Soft bounce'} · {Object.values(m.tracks).filter(t=>t.enabled).length} active lanes</p><button onClick={()=>openMix(m.name)}>Open in DJ station →</button><button onClick={()=>deleteMix(m.name)}>Delete song</button></article>)}</div>{!mixes.length&&<p>Save a song in the DJ station to keep it here.</p>}<p role="status">{savedMessage}</p></section> : mode === 'mix' ? <>
+      <section className="studio-console" aria-label="Bird song mixer"><div className="studio-topline"><h2>Your little chorus</h2><span>{`✦ ${availableVoices.length} voices available`}</span></div>
+        <div className="studio-voices">{lanes.map((voice,i) => {const track=tracks[voice.id], locked=!availableVoices.some(v=>v.id===track.birdId), active=pulses.some(p=>p.id===voice.id);return <div key={voice.id} className={`studio-voice ${active?'is-singing':''}`}><div className="flock-voice"><span className="flock-portrait"><span className="flock-bird-art">{(()=>{const source=voices.find(v=>v.id===track.birdId),art=catalogVoices.find(v=>v.id===(source?.birdId||source?.id));return art?<BirdArt bird={art} small/>:<span className="music-generic-note">♪</span>;})()}</span></span><span className="flock-voice-name">Lane {i+1} · {voice.commonName}</span></div><label>Sound source<select aria-label={`Sound source for lane ${i+1}`} disabled={playing||busy} value={track.birdId} onChange={e=>chooseSource(voice.id,e.target.value)}>{!voices.some(v=>v.id===track.birdId)&&<option disabled value={track.birdId}>Source removed · choose another</option>}{voices.map(v=><option key={v.id} value={v.id} disabled={!availableVoices.some(a=>a.id===v.id)}>{v.isSaved?'Saved · ':''}{v.commonName}{!availableVoices.some(a=>a.id===v.id)?' · welcome to unlock':''}</option>)}</select></label><label>Enters on beat<select aria-label={`Entry beat for lane ${i+1}`} disabled={playing||busy} value={track.step} onChange={e=>change(voice.id,'step',Number(e.target.value))}>{Array.from({length:8},(_,j)=><option key={j} value={j}>{j+1}</option>)}</select></label><label>Mix level<input aria-label={`Mix level for lane ${i+1}`} type="range" min="0" max=".8" step=".05" value={track.volume} onChange={e=>change(voice.id,'volume',Number(e.target.value))}/></label><button className="studio-switch" disabled={locked||busy} aria-pressed={!locked&&track.enabled} onClick={()=>change(voice.id,'enabled',!track.enabled)}>{locked?(voices.some(v=>v.id===track.birdId)?'Welcome this bird':'Choose another sound'):track.enabled?'✓ In the mix':'+ Add lane'}</button></div>})}</div>
+        <p className="studio-hint">Welcome a bird: arrange three distinct phrases, play a full loop, then save. One collection reward.</p><p className="studio-hint">Eight beats per loop. Each lane enters on its chosen beat; numbers mark time. Long phrases play a loop-length excerpt so they don’t pile up.</p><div className="studio-steps" aria-label="Eight-beat loop">{Array.from({length:8},(_,i)=><span key={i} className={playing&&pulses.some(p=>p.step===i)?'active':''}>{i+1}</span>)}</div>
+        <div className="studio-transport"><button className="studio-play" onClick={play}>{busy ? 'Cancel loading' : playing ? '■ Stop song' : '▶ Play song'}</button><label>Tempo <select value={tempo} disabled={playing || busy} onChange={e=>setTempo(Number(e.target.value))}><option value="80">80 · Easy</option><option value="100">100 · Breezy</option><option value="120">120 · Bouncy</option></select></label><label>Beat <select value={beat} disabled={playing || busy} onChange={e=>setBeat(e.target.value)}><option value="none">Just birds</option><option value="woodland">Woodland tap</option><option value="soft">Soft bounce</option></select></label></div>
+        <p className="studio-hint">Choose a bird, saved call or phrase independently in each lane. Shape and name new phrases in the phrase workshop.</p>
+      </section>
+      <section className="world-panel"><h2>Make a phrase of your own</h2><p>Choose its bird and recording independently, then trim, adjust volume and pitch, and save it for these lanes.</p><button onClick={()=>section('workshop')}>Open phrase workshop →</button></section>
+      <section className="studio-save" aria-label="Saved songs"><h2>Keep your little song</h2><label>Song name<input maxLength="60" value={mixName} onChange={e=>setMixName(e.target.value)}/></label><button onClick={saveMix}>Save song</button><label>Open a saved song<select value="" onChange={e=>openMix(e.target.value)}><option value="">Choose a saved song…</option>{mixes.map(m=><option key={m.name} value={m.name}>{m.name}</option>)}</select></label><p role="status">{savedMessage}</p><small>Saves bird choices, phrases, pitch, tempo and beat on this device. This is a reusable mix, not an exported audio file.</small></section><section className="studio-reward"><div><h3>{unlocked ? 'A world of voices to make your own.' : 'Grow your little chorus.'}</h3><p>{unlocked ? 'Every welcomed bird is available in Studio. Try three different phrases, play a full loop, then save your song to welcome another bird.' : 'Welcome birds anywhere in Birdsong to use their voices here. A 5/6 phrase challenge also earns one shared collection reward.'}</p></div><button onClick={begin}>Take the phrase challenge →</button></section>
+    </> : <section className="studio-challenge">{finished ? <><p className="eyebrow">PHRASE CHALLENGE COMPLETE</p><h2>{score}/6 · {score >= 5 ? 'Your chorus just grew!' : 'A little more listening.'}</h2><p>{score >= 5 ? 'Your phrase challenge milestone is complete. Visit Your Nest to see your growing collection.' : 'Score 5/6 to earn your one-time collection reward. Your flight accuracy stays separate.'}</p><button className="studio-play" onClick={()=>{stop();setMode('mix');}}>Back to your song →</button><button onClick={begin}>Try another challenge</button></> : <><p className="eyebrow">PHRASE {index+1} OF 6 · {score} CORRECT</p><h2>Whose little phrase is this?</h2><p>Short excerpts from familiar recordings. Listen before choosing.</p><button className="studio-play" disabled={busy} onClick={()=>preview(current.bird,current.start)}>{busy ? 'Loading voice…' : '▶ Listen to the phrase'}</button><div className="studio-answers">{challengeVoices.map(voice=><button key={voice.id} disabled={!heard || !!answer || busy} onClick={()=>choose(voice.id)}>{voice.commonName}</button>)}</div>{answer && <div role="status"><h3>{answer === current.bird.id ? 'That’s the voice!' : `That was ${current.bird.commonName}.`}</h3><p>{current.bird.mnemonic}</p><button onClick={next}>{index === 5 ? 'See your result →' : 'Next phrase →'}</button></div>}</>}</section>}
+    <details className="studio-credits"><summary>Recording credits & what’s saved</summary><p>Studio uses edited excerpts of these credited recordings. Trimming, fades and optional pitch changes are applied during playback. Beats are generated in the app.</p><ul>{catalogVoices.map(voice=>{const credit=audioCredits.find(c=>c.bird===voice.commonName);return <li key={voice.id}>{voice.commonName} · {credit?.creator} · {credit?.license} {credit&&<a href={credit.sourceUrl} target="_blank" rel="noreferrer">Source recording ↗</a>}{credit?.licenseUrl&&<> · <a href={credit.licenseUrl} target="_blank" rel="noreferrer">License</a></>}</li>})}</ul><p>Your earned chorus unlock and songs you explicitly save are stored on this device. Previews are temporary. No microphone is used here.</p></details>
+  </main>;
+}

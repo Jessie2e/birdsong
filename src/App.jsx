@@ -1,216 +1,27 @@
+import AdvancedListening from './AdvancedListening';
 import { useEffect, useRef, useState } from "react";
 import { birds } from "./data/birds";
+import SoundAlikes from "./SoundAlikes";
+import OutdoorListening from "./OutdoorListening";
+import BirdsongStudio from "./BirdsongStudio";
+import { initialFlock, unlockOrder, earnsBird } from "./flock";
+import { shuffle, planFlight, recognition, recentStats, badgeProgress } from "./progress";
 
-const audioCredits = [
-  {
-    bird: "Northern Cardinal",
-    creator: "G. McGrane",
-    source: "Wikimedia Commons",
-    sourceUrl:
-      "https://commons.wikimedia.org/wiki/File:Northern_Cardinal.ogg",
-    license: "Public Domain",
-  },
-  {
-    bird: "American Robin",
-    creator: "G. McGrane",
-    source: "Wikimedia Commons",
-    sourceUrl:
-      "https://commons.wikimedia.org/wiki/File:American_Robin.ogg",
-    license: "Public Domain",
-  },
-  {
-    bird: "Blue Jay",
-    creator: "G. McGrane",
-    source: "Wikimedia Commons",
-    sourceUrl:
-      "https://commons.wikimedia.org/wiki/File:Blue_Jay.ogg",
-    license: "Public Domain",
-  },
-  {
-    bird: "Carolina Wren",
-    creator: "G. McGrane",
-    source: "Wikimedia Commons",
-    sourceUrl:
-      "https://commons.wikimedia.org/wiki/File:Carolina_Wren.ogg",
-    license: "Public Domain",
-  },
-  {
-    bird: "Black-capped Chickadee",
-    creator: "Jonathon Jongsma",
-    source: "Xeno-canto via Wikimedia Commons",
-    sourceUrl:
-      "https://commons.wikimedia.org/wiki/File:Poecile_atricapillus_-_Black-capped_Chickadee_XC123506.ogg",
-    license: "CC BY-SA 3.0",
-    licenseUrl:
-      "https://creativecommons.org/licenses/by-sa/3.0/",
-    edited: false,
-  },
-  {
-    bird: "Mourning Dove",
-    creator: "Francis C., Ortega C. & Cruz A.",
-    source: "Wikimedia Commons",
-    sourceUrl:
-      "https://commons.wikimedia.org/wiki/File:Zenaida_macroura_vocalizations_-_pone.0027052.s009.oga",
-    license: "CC BY 2.5",
-    licenseUrl:
-      "https://creativecommons.org/licenses/by/2.5/",
-    edited: false,
-  },
-  {
-    bird: "Tufted Titmouse",
-    creator: "U.S. Fish & Wildlife Service",
-    source: "Wikimedia Commons",
-    sourceUrl:
-      "https://commons.wikimedia.org/wiki/File:Tufted_Titmouse_call.ogg",
-    license: "Public Domain",
-  },
-  {
-    bird: "Eastern Bluebird",
-    creator: "Jonathon Jongsma",
-    source: "Xeno-canto via Wikimedia Commons",
-    sourceUrl:
-      "https://commons.wikimedia.org/wiki/File:Sialia_sialis_-_Eastern_Bluebird_-_XC79976.ogg",
-    license: "CC BY-SA 3.0",
-    licenseUrl:
-      "https://creativecommons.org/licenses/by-sa/3.0/",
-    edited: false,
-  },
-  {
-    bird: "White-breasted Nuthatch",
-    creator: "G. McGrane",
-    source: "Wikimedia Commons",
-    sourceUrl:
-      "https://commons.wikimedia.org/wiki/File:White-breasted_Nuthatch.ogg",
-    license: "Public Domain",
-  },
-  {
-    bird: "House Finch",
-    creator: "Francis C., Ortega C. & Cruz A.",
-    source: "Wikimedia Commons",
-    sourceUrl:
-      "https://commons.wikimedia.org/wiki/File:Carpodacus_mexicanus_vocalizations_-_pone.0027052.s006.oga",
-    license: "CC BY 2.5",
-    licenseUrl:
-      "https://creativecommons.org/licenses/by/2.5/",
-    edited: false,
-  },
-  {
-    bird: "American Crow",
-    creator: "G. McGrane",
-    source: "Wikimedia Commons",
-    sourceUrl:
-      "https://commons.wikimedia.org/wiki/File:American_Crow.ogg",
-    license: "Public Domain",
-  },
-  {
-    bird: "Red-bellied Woodpecker",
-    creator: "Jonathon Jongsma",
-    source: "Xeno-canto via Wikimedia Commons",
-    sourceUrl:
-      "https://commons.wikimedia.org/wiki/File:Melanerpes_carolinus_-_Red-bellied_Woodpecker_-_XC71728.ogg",
-    license: "CC BY-SA 3.0",
-    licenseUrl:
-      "https://creativecommons.org/licenses/by-sa/3.0/",
-    edited: false,
-  },
-  {
-    bird: "Barred Owl",
-    creator: "Tom Cosburn",
-    source: "British Library via Wikimedia Commons",
-    sourceUrl:
-      "https://commons.wikimedia.org/wiki/File:Barred_Owl_(Strix_varia)_(W1CDR0000351_BD27).ogg",
-    license: "CC BY 4.0",
-    licenseUrl:
-      "https://creativecommons.org/licenses/by/4.0/",
-    edited: false,
-  },
-  {
-    bird: "Eastern Towhee",
-    creator: "Jonathon Jongsma",
-    source: "Xeno-canto via Wikimedia Commons",
-    sourceUrl:
-      "https://commons.wikimedia.org/wiki/File:Pipilo_erythrophthalmus_-_Eastern_Towhee_-_XC81298.ogg",
-    license: "CC BY-SA 3.0",
-    licenseUrl:
-      "https://creativecommons.org/licenses/by-sa/3.0/",
-    edited: false,
-  },
-  {
-    bird: "Killdeer",
-    creator: "U.S. National Park Service",
-    source: "Wikimedia Commons",
-    sourceUrl:
-      "https://commons.wikimedia.org/wiki/File:Charadrius_vociferus.ogg",
-    license: "Public Domain",
-  },
-  {
-    bird: "Northern Mockingbird",
-    creator: "David Illig",
-    source: "Wikimedia Commons",
-    sourceUrl:
-      "https://commons.wikimedia.org/wiki/File:Mimus_polyglottos_Northern_Mockingbird.ogg",
-    license: "CC BY-SA 3.0",
-    licenseUrl:
-      "https://creativecommons.org/licenses/by-sa/3.0/",
-    edited: false,
-  },
-  {
-    bird: "Carolina Chickadee",
-    creator: "G. McGrane",
-    source: "Wikimedia Commons",
-    sourceUrl:
-      "https://commons.wikimedia.org/wiki/File:Carolina_Chickadee.ogg",
-    license: "Public Domain",
-  },
-];
+import { audioCredits } from "./audio-credits";
+import useRecordings from "./useRecordings";
+import { personalRounds } from "./personal-recordings";
+import RecordingShelf from "./RecordingShelf";
+import BirdHub from "./BirdHub";
+import ExploreWorld from "./ExploreWorld";
+import Sanctuary from "./Sanctuary";
+import {WORLD_KEY,claimMilestone} from "./world-progress";
+import NextAdventure from "./NextAdventure";
+
 
 const GUESS_HISTORY_KEY = "birdsong-guess-history-v1";
 const RESET_AT_KEY = "birdsong-reset-at-v1";
 const DISCOVERED_KEY = "birdsong-discovered-v3";
 const SPOTTED_KEY = "birdsong-spotted-v1";
-
-const starterBirds = [
-  "cardinal",
-  "robin",
-  "bluejay",
-  "mourning-dove",
-];
-
-const unlockOrder = [
-  "cardinal",
-  "robin",
-  "bluejay",
-  "mourning-dove",
-  "american-crow",
-  "carolina-wren",
-  "chickadee",
-  "titmouse",
-  "eastern-bluebird",
-  "nuthatch",
-  "house-finch",
-  "red-bellied-woodpecker",
-  "barred-owl",
-  "killdeer",
-  "eastern-towhee",
-  "northern-mockingbird",
-  "carolina-chickadee",
-];
-
-function getFlockRank(count) {
-  if (count >= birds.length) {
-    return { name: "Birdsong Naturalist", icon: "🦅" };
-  }
-
-  if (count >= 8) {
-    return { name: "Song Spotter", icon: "🌳" };
-  }
-
-  if (count >= 5) {
-    return { name: "Backyard Birder", icon: "🪶" };
-  }
-
-  return { name: "Hatchling", icon: "🌱" };
-}
 
 function getFlightRating(score) {
   if (score === 10) return "🪶🪶🪶 Perfect flight";
@@ -249,10 +60,6 @@ function getBirdStats(history, birdId, after = 0) {
           )
         : null,
   };
-}
-
-function shuffle(array) {
-  return [...array].sort(() => Math.random() - 0.5);
 }
 
 function createRounds(
@@ -320,110 +127,8 @@ function BirdIllustration({ bird, small = false }) {
   );
 }
 
-function HomeScreen({
-  onPlay,
-  onPractice,
-  onNearby,
-  onGuide,
-  onCredits,
-  discoveredBirds,
-}) {
-  const discoveredCount = discoveredBirds.length;
-  const rank = getFlockRank(discoveredCount);
-  const progress = Math.round(
-    (discoveredCount / birds.length) * 100
-  );
-  return (
-    <main className="home-screen screen">
-      <div className="cloud cloud-one" />
-      <div className="cloud cloud-two" />
-
-      <div className="home-copy">
-        <p className="eyebrow">
-          LISTEN · LEARN · PLAY
-        </p>
-
-        <h1>
-          Bird<span>song</span>
-        </h1>
-
-        <p className="home-subtitle">
-          Can you name that bird?
-        </p>
-
-        <section className="flock-progress-card" aria-label="Flock progress">
-          <div className="flock-progress-topline">
-            <span>{rank.icon} {rank.name}</span>
-            <strong>{discoveredCount}/{birds.length} species</strong>
-          </div>
-
-          <div className="flock-progress-track" aria-hidden="true">
-            <div
-              className="flock-progress-fill"
-              style={{ width: `${progress}%` }}
-            />
-          </div>
-
-          <small>Finish a 10-bird flight to welcome a new bird.</small>
-        </section>
-
-        <button
-          className="primary-button"
-          onClick={onPlay}
-        >
-          Play
-          <span>→</span>
-        </button>
-
-        <div className="secondary-actions">
-          <button onClick={onPractice}>
-            Practice Calls
-          </button>
-
-          <button onClick={onGuide}>
-            Field Guide
-          </button>
-
-          <button
-            className="nearby-home-button"
-            onClick={onNearby}
-          >
-            <span>⌖</span> Practice Nearby
-          </button>
-        </div>
-
-        <button
-          className="audio-credits-link"
-          onClick={onCredits}
-        >
-          ♪ Audio Credits
-        </button>
-      </div>
-
-      <div className="home-scene">
-        <div className="sun" />
-
-        <div className="tree tree-left">
-          <div className="tree-top" />
-          <div className="tree-trunk" />
-        </div>
-
-        <div className="tree tree-right">
-          <div className="tree-top" />
-          <div className="tree-trunk" />
-        </div>
-
-        <div className="hero-branch" />
-
-        <div className="hero-bird">
-          <BirdIllustration bird={birds[4]} />
-        </div>
-
-        <div className="ground ground-back" />
-        <div className="ground ground-front" />
-      </div>
-    </main>
-  );
+function LearnScreen({onHome,onPlay,onPractice,onBadges,onSoundAlikes,onStudio,onAdvanced,discoveredBirds,history,sessions,spottedBirds}) {
+ return <main className="world-screen screen"><button className="back-button" onClick={onHome}>← Birdsong</button><header className="world-header"><p className="eyebrow">A LITTLE CHALLENGE. A GROWING EAR.</p><h1>Play & Learn.</h1><p>Get to know the voices around you, one little flight at a time.</p></header><section className="flight-start-card"><p className="eyebrow">YOUR NEXT FLIGHT</p><h2>Ten calls. How many do you know?</h2><p>A flight is a short listening quiz: play a bird call, then choose its name. There’s no timer. Score <strong>8 out of 10</strong> to welcome the next bird into your shared collection.</p><button className="primary-button" onClick={onPlay}>Start a 10-question flight <span>→</span></button><small>Welcomed birds are yours to enjoy in Studio and Your Nest. You can also welcome birds through music, field notes and companion visits.</small></section><details className="learning-explainer"><summary>What does “voice recognized” mean?</summary><p>It means you’re getting familiar with a bird by ear: at least four correct answers in a group of five attempts, spread over two or more flights. It adds a recognition mark to that bird’s collection card, helps you track what you know, and gives developing voices more priority in future flights. Your learning badges celebrate these milestones too. Recognize two birds to open A sharper ear, with short phrases and two-voice challenges toward Mastered by ear.</p><p>Welcoming a bird adds it to your collection. Recognizing its voice records what you’ve learned about it.</p></details><NextAdventure birds={birds} history={history} sessions={sessions} discoveredBirds={discoveredBirds} onPlay={onPlay} onStudio={onStudio} onSoundAlikes={onSoundAlikes}/><div className="world-actions"><button onClick={onPractice}><strong>Practice calls</strong><span>Listen freely to the birds in your collection</span></button><button onClick={onSoundAlikes}><strong>Sound-alikes</strong><span>Learn what makes two voices different</span></button></div><section className="world-panel"><h2>A sharper ear</h2><p>Recognize two voices to open short-phrase and two-voice challenges. Learn both to earn Mastered by ear, and earn extra Pip species changes along the way.</p><button onClick={onAdvanced}>Explore advanced listening →</button></section><ProgressSummary history={history} sessions={sessions} spottedBirds={spottedBirds} onBadges={onBadges}/></main>;
 }
 
 function GameScreen({
@@ -433,10 +138,15 @@ function GameScreen({
   unlockBird = null,
   birdPool = birds,
   modeLabel = null,
+  history = [], sessions = [], spottedBirds = [], onComplete, onPracticeMissed, personalClips = [], focusBirdId = null,
 }) {
   const [rounds, setRounds] = useState(() =>
-    createRounds(10, birdPool, birdPool)
+    modeLabel ? createRounds(10, birdPool, birdPool) : personalRounds(planFlight(birdPool, history,10,focusBirdId),personalClips)
   );
+
+  const [sessionId, setSessionId] = useState(() => crypto.randomUUID());
+  const [startedHistory, setStartedHistory] = useState(history);
+  const [answers, setAnswers] = useState([]);
 
   const [roundIndex, setRoundIndex] =
     useState(0);
@@ -582,8 +292,9 @@ function toggleUnlockedBirdSound() {
 
     onGuess(
       currentRound.correct.id,
-      correct
+      correct, { selectedBirdId: bird.id, sessionId: sessionId, mode: modeLabel ? "nearby" : "flight", recordingId: currentRound.correct.recordingId || currentRound.correct.id + "-original" }
     );
+    setAnswers(current => [...current, { birdId: currentRound.correct.id, correct }]);
 
     if (correct) {
       setScore((current) => current + 1);
@@ -597,11 +308,12 @@ function toggleUnlockedBirdSound() {
       roundIndex ===
       rounds.length - 1
     ) {
-      if (unlockBird && onUnlockBird) {
+      if (unlockBird && onUnlockBird && earnsBird(score, rounds.length)) {
         setNewlyUnlocked(unlockBird);
         onUnlockBird(unlockBird.id);
       }
 
+      onComplete?.({ id: sessionId, timestamp: Date.now(), mode: modeLabel ? "nearby" : "flight", score, birdIds: answers.map(a => a.birdId) });
       setFinished(true);
       return;
     }
@@ -616,7 +328,10 @@ function toggleUnlockedBirdSound() {
   function restart() {
     stopCurrentAudio();
 
-    setRounds(createRounds(10, birdPool, birdPool));
+    setSessionId(crypto.randomUUID());
+    setStartedHistory(history);
+    setAnswers([]);
+    setRounds(modeLabel ? createRounds(10, birdPool, birdPool) : personalRounds(planFlight(birdPool, history,10,focusBirdId),personalClips));
     setRoundIndex(0);
     setSelectedBird(null);
     setScore(0);
@@ -629,6 +344,10 @@ function toggleUnlockedBirdSound() {
     onHome();
   }
 
+  const newlyRecognized = birdPool.filter(b => recognition(history, b.id) && !recognition(startedHistory, b.id));
+  const missed = [...new Set(answers.filter(a => !a.correct).map(a => a.birdId))];
+  const beforeBadges = badgeProgress(startedHistory, sessions.filter(s => s.id !== sessionId), spottedBirds);
+  const earnedBadges = badgeProgress(history, sessions, spottedBirds).filter(b => b.value >= b.target && beforeBadges.find(previous => previous.id === b.id)?.value < b.target);
   if (finished) {
     return (
       <main className="screen results-screen">
@@ -686,12 +405,21 @@ function toggleUnlockedBirdSound() {
             </section>
           )}
 
-          {!newlyUnlocked && !modeLabel && (
+          {!newlyUnlocked && !modeLabel && unlockBird && (
+            <p className="unlock-goal" role="status">Score 8/10 or higher to welcome your next bird. {8 - score} more correct {8 - score === 1 ? "answer" : "answers"} would reach the goal. Your progress is saved—try another flight.</p>
+          )}
+          {!newlyUnlocked && !modeLabel && !unlockBird && (
             <p className="flock-complete-note">
               🦅 Your whole Birdsong flock is unlocked.
             </p>
           )}
 
+          <div className="flight-growth" aria-live="polite">
+            {newlyRecognized.map(b => <p key={b.id}>✓ {b.commonName} is now Recognized.</p>)}
+            {earnedBadges.map(b => <p key={b.id}>{b.icon} Badge earned: {b.name}</p>)}
+            {!newlyRecognized.length && !earnedBadges.length && <p>Every listen builds your ear. Your next flight will revisit developing voices.</p>}
+          </div>
+          {missed.length > 0 && <button className="review-button" onClick={() => { stopCurrentAudio(); onPracticeMissed?.(missed); }}>♪ Practice your {missed.length} tricky {missed.length === 1 ? 'bird' : 'birds'}</button>}
           <button
             className="primary-button"
             onClick={restart}
@@ -752,6 +480,7 @@ function toggleUnlockedBirdSound() {
         />
       </div>
 
+      {!modeLabel && unlockBird && <p className="flight-unlock-target">Your goal: 8/10 to welcome a new bird</p>}
       <section className="game-prompt">
         <p className="eyebrow">
           WHO'S SINGING?
@@ -901,7 +630,7 @@ function toggleUnlockedBirdSound() {
   );
 }
 
-function PracticeScreen({ onHome, birdPool }) {
+function PracticeScreen({ onHome, birdPool, targeted = false, outdoor = false }) {
   const audioRef = useRef(null);
   const [activeBirdId, setActiveBirdId] =
     useState(null);
@@ -990,16 +719,15 @@ function PracticeScreen({ onHome, birdPool }) {
           PRACTICE PERCH
         </p>
 
-        <h2>Meet the flock.</h2>
+        <h2>{outdoor ? "Remember this voice." : targeted ? "Your next breakthrough." : "Meet the flock."}</h2>
 
         <p>
-          Tap a bird to hear its call. Your practice perch grows
-          each time you finish a 10-bird flight.
+          {outdoor ? "Compare this call with what you heard outside. Listening here won’t affect accuracy or unlock your game flock." : targeted ? "Listen to the voices you missed, then return for another flight. Listening here won’t affect accuracy." : "Tap a bird to hear its call. Start with eight birds. Score 8/10 or higher in a flight to grow your practice perch."}
         </p>
       </header>
 
       <div className="practice-flock-count">
-        {birdPool.length} of {birds.length} birds in your flock
+        {outdoor ? "Your outdoor discovery" : targeted ? `${birdPool.length} voices to revisit` : `${birdPool.length} of ${birds.length} birds in your flock`}
       </div>
 
       <div className="collection-grid">
@@ -1060,6 +788,31 @@ function NearbyScreen({
   const [nearbyBirds, setNearbyBirds] = useState([]);
   const [errorMessage, setErrorMessage] = useState("");
 
+  const [placeQuery, setPlaceQuery] = useState("");
+  const [places, setPlaces] = useState([]);
+  const [placeError, setPlaceError] = useState("");
+  const [searchingPlaces, setSearchingPlaces] = useState(false);
+  const [selectedPlace, setSelectedPlace] = useState(null);
+  const [sampleMode, setSampleMode] = useState(false);
+
+  async function searchPlaces(event) {
+    event.preventDefault();
+    if (placeQuery.trim().length < 2) { setPlaceError("Enter a city or ZIP code."); return; }
+    setSearchingPlaces(true); setPlaceError(""); setPlaces([]);
+    try {
+      const response = await fetch(`/api/location-search?q=${encodeURIComponent(placeQuery.trim())}`, { signal: AbortSignal.timeout(12000) });
+      const payload = await response.json();
+      if (!response.ok) throw new Error(payload.error || "Location search is unavailable.");
+      setPlaces(payload.places || []);
+      if (!payload.places?.length) setPlaceError("No places found. Try a city with its state or country, or another ZIP code.");
+    } catch { setPlaceError("We couldn’t search places right now. Check your connection and try again."); }
+    finally { setSearchingPlaces(false); }
+  }
+
+  function showSample() {
+    setSampleMode(true); setNearbyBirds(birds.filter(b => ["cardinal", "robin", "bluejay", "mourning-dove", "carolina-wren", "red-shouldered-hawk"].includes(b.id))); setErrorMessage(""); setStatus("success");
+  }
+
   function getPosition() {
     return new Promise((resolve, reject) => {
       if (!navigator.geolocation) {
@@ -1098,14 +851,17 @@ function NearbyScreen({
     )}`;
   }
 
-  async function findNearby(nextRadius = radius) {
+  async function findNearby(nextRadius = radius, place = selectedPlace) {
+    setSampleMode(false);
     setRadius(nextRadius);
     setNearbyBirds([]);
     setErrorMessage("");
-    setStatus("locating");
+    setStatus(place ? "loading" : "locating");
 
     try {
-      const position = await getPosition();
+      const position = place ? {coords:{latitude:place.latitude, longitude:place.longitude}} : await getPosition();
+      const lookupPlace = place || {latitude:position.coords.latitude, longitude:position.coords.longitude, label:"Your current location"};
+      setSelectedPlace(lookupPlace);
 
       /*
         Round to two decimals before the request. That is
@@ -1122,10 +878,10 @@ function NearbyScreen({
           lat
         )}&lng=${encodeURIComponent(
           lng
-        )}&dist=${nextRadius}&back=7`
+        )}&dist=${nextRadius}&back=7`, { signal: AbortSignal.timeout(15000) }
       );
 
-      const payload = await response.json().catch(() => ({}));
+      const payload = await response.json().catch(() => { throw new Error("The Nearby connection is unavailable. Restart the local preview and try again."); });
 
       if (!response.ok) {
         throw new Error(
@@ -1209,6 +965,20 @@ function NearbyScreen({
         </p>
       </header>
 
+      <section className="nearby-place-picker" aria-labelledby="nearby-place-heading">
+        <h3 id="nearby-place-heading">Choose your perch</h3>
+        <p>Automatic location not working? Search a city or ZIP instead.</p>
+        <form onSubmit={searchPlaces}>
+          <label htmlFor="nearby-place">City or ZIP code</label>
+          <div className="nearby-place-form"><input id="nearby-place" value={placeQuery} onChange={event => setPlaceQuery(event.target.value)} placeholder="e.g. Chicago, IL or 60614" maxLength={100} disabled={isBusy || searchingPlaces} /><button disabled={isBusy || searchingPlaces}>{searchingPlaces ? "Searching…" : "Find place"}</button></div>
+        </form>
+        {placeError && <p role="alert">{placeError}</p>}
+        {places.length > 0 && <ul className="nearby-place-results" aria-label="Matching places">{places.map(place => <li key={place.id}><button disabled={isBusy} onClick={() => { setSelectedPlace(place); setPlaces([]); findNearby(25, place); }}><span>{place.label}</span><span aria-hidden="true">→</span></button></li>)}</ul>}
+        {selectedPlace && <p className="nearby-selected-place">Selected place: <strong>{selectedPlace.label}</strong></p>}
+        <small>Place search by <a href="https://open-meteo.com/" target="_blank" rel="noreferrer">Open-Meteo</a> / <a href="https://www.geonames.org/" target="_blank" rel="noreferrer">GeoNames</a>. Your search is sent to the place provider; Birdsong doesn’t save it.</small>
+        {import.meta.env.DEV && <button className="nearby-sample-button" disabled={isBusy || searchingPlaces} onClick={showSample}>Try sample birds · local preview</button>}
+      </section>
+
       {status === "idle" && (
         <section className="nearby-intro-card">
           <div className="nearby-compass" aria-hidden="true">
@@ -1222,7 +992,8 @@ function NearbyScreen({
             </p>
             <button
               className="primary-button nearby-find-button"
-              onClick={() => findNearby(25)}
+              onClick={() => findNearby(25, null)}
+              disabled={searchingPlaces}
             >
               Use my location
               <span>→</span>
@@ -1268,19 +1039,19 @@ function NearbyScreen({
         <>
           <section className="nearby-summary">
             <div>
-              <p className="eyebrow">RECENTLY REPORTED</p>
+              <p className="eyebrow">{sampleMode ? "LOCAL PREVIEW · SAMPLE DATA" : "RECENTLY REPORTED"}</p>
               <h3>
                 {nearbyBirds.length} of {birds.length} Birdsong
-                {" "}species nearby
+                {" "}{sampleMode ? "sample species" : "species nearby"}
               </h3>
               <p>
-                Within {radius} km · reported in the last 7 days
+                {sampleMode ? "Sample birds for testing · not live sightings" : `${selectedPlace?.label || "Your current location"} · Within ${radius} km · last 7 days`}
               </p>
             </div>
 
             <button
               className="nearby-refresh-button"
-              onClick={() => findNearby(radius)}
+              onClick={() => sampleMode ? showSample() : findNearby(radius)}
             >
               ↻ Refresh
             </button>
@@ -1313,7 +1084,7 @@ function NearbyScreen({
                       </div>
 
                       <span className="nearby-report-date">
-                        {formatObservationDate(
+                        {sampleMode ? "Sample bird · not a sighting" : formatObservationDate(
                           bird.nearbyObservation?.obsDt
                         )}
                       </span>
@@ -1335,7 +1106,7 @@ function NearbyScreen({
                   <span>→</span>
                 </button>
 
-                {radius < 50 && (
+                {!sampleMode && radius < 50 && (
                   <button
                     className="nearby-secondary-button"
                     onClick={() => findNearby(50)}
@@ -1377,10 +1148,7 @@ function NearbyScreen({
           )}
 
           <p className="nearby-source-note">
-            Recent observation data from eBird · Cornell Lab of
-            Ornithology. Reports show where species have been
-            observed, not a guarantee that a bird is currently
-            present.
+            {sampleMode ? "Sample birds for testing this preview. These are not eBird observations and do not represent birds reported at your location." : "Recent observation data from eBird · Cornell Lab of Ornithology. Reports show where species have been observed, not a guarantee that a bird is currently present."}
           </p>
         </>
       )}
@@ -1397,6 +1165,24 @@ function FieldGuideScreen({
   onSetSpotted,
   onStartFresh,
 }) {
+  const [period, setPeriod] = useState("fresh");
+  const [guideFilter, setGuideFilter] = useState("flock");
+  const [search, setSearch] = useState("");
+  const now = new Date();
+  const thisMonth = new Date(now.getFullYear(), now.getMonth(), 1).getTime();
+  const lastMonth = new Date(now.getFullYear(), now.getMonth() - 1, 1).getTime();
+  const periodHistory = period === "last" ? history.filter(g => g.timestamp < thisMonth) : history;
+  const periodStart = period === "month" ? thisMonth : period === "last" ? lastMonth : period === "all" ? 0 : resetAt;
+  const visibleBirds = birds.filter(bird => {
+    const matchesSearch = `${bird.commonName} ${bird.scientificName}`.toLowerCase().includes(search.toLowerCase());
+    if (!matchesSearch) return false;
+    if (guideFilter === "all") return true;
+    if (guideFilter === "spotted") return spottedBirds.includes(bird.id);
+    if (!discoveredBirds.includes(bird.id)) return false;
+    if (guideFilter === "recognized") return recognition(history, bird.id);
+    if (guideFilter === "review") return !recognition(history, bird.id);
+    return true;
+  });
   const [flippedBirdId, setFlippedBirdId] =
     useState(null);
 
@@ -1445,7 +1231,7 @@ function FieldGuideScreen({
 
         <div className="guide-stat-controls">
           <span>
-            Current stats since{" "}
+            Fresh-start period since{" "}
             {new Date(resetAt).toLocaleDateString(
               undefined,
               {
@@ -1461,8 +1247,14 @@ function FieldGuideScreen({
         </div>
       </header>
 
+      <div className="guide-tools">
+        <label>Find a bird<input value={search} onChange={e => setSearch(e.target.value)} placeholder="Search names" /></label>
+        <label>Show<select value={guideFilter} onChange={e => setGuideFilter(e.target.value)}><option value="flock">My flock</option><option value="all">All birds</option><option value="review">Needs review</option><option value="recognized">Recognized</option><option value="spotted">Spotted</option></select></label>
+        <label>Accuracy period<select value={period} onChange={e => setPeriod(e.target.value)}><option value="fresh">Since fresh start</option><option value="month">This month</option><option value="last">Last month</option><option value="all">All time</option></select></label>
+      </div>
+      {visibleBirds.length === 0 && <p className="guide-empty" role="status">No birds match yet. Try another filter or search.</p>}
       <div className="guide-grid">
-        {birds.map((bird) => {
+        {visibleBirds.map((bird) => {
           const unlocked =
             discoveredBirds.includes(bird.id);
 
@@ -1472,9 +1264,9 @@ function FieldGuideScreen({
           );
 
           const current = getBirdStats(
-            history,
+            periodHistory,
             bird.id,
-            resetAt
+            periodStart
           );
 
           const flipped =
@@ -1537,6 +1329,7 @@ function FieldGuideScreen({
 
                   {unlocked ? (
                     <>
+                      <span className="recognition-chip">{recognition(history, bird.id) ? "✓ Recognized" : "♪ Learning"}</span>
                       <p className="difficulty">
                         {"●".repeat(
                           bird.difficulty
@@ -1572,8 +1365,8 @@ function FieldGuideScreen({
                     <div className="locked-copy">
                       <h3>Undiscovered</h3>
                       <p>
-                        Complete a flight to welcome
-                        this bird into your flock.
+                        Score 8/10 or higher in a flight
+                        to welcome a new bird into your flock.
                       </p>
                     </div>
                   )}
@@ -1602,8 +1395,9 @@ function FieldGuideScreen({
                     </small>
                   </div>
 
+                  <p className="recent-ear">Recent: {recentStats(history, bird.id).correct} of {recentStats(history, bird.id).count} correct</p>
                   <div className="accuracy-block current-accuracy">
-                    <span>Since fresh start</span>
+                    <span>{{ fresh: "Since fresh start", month: "This month", last: "Last month", all: "All time" }[period]}</span>
 
                     <strong>
                       {current.accuracy === null
@@ -1715,6 +1509,7 @@ function CreditsScreen({ onHome }) {
                 Recording by{" "}
                 <strong>{credit.creator}</strong>
               </p>
+              {credit.note && <p className="credit-note">{credit.note}</p>}
             </div>
 
             <div className="credit-meta">
@@ -1738,6 +1533,7 @@ function CreditsScreen({ onHome }) {
                 <span>{credit.license}</span>
               )}
 
+              {credit.edited === false && <span>Original recording · unmodified</span>}
               {credit.edited && (
                 <span>Edited for length</span>
               )}
@@ -1755,9 +1551,49 @@ function CreditsScreen({ onHome }) {
   );
 }
 
-export default function App() {
+function ProgressSummary({ history, sessions, spottedBirds, onBadges }) {
+  const badges = badgeProgress(history, sessions, spottedBirds);
+  const next = badges.find(b => b.value < b.target);
+  const recognized = birds.filter(b => recognition(history, b.id)).length;
+  const week = new Date();
+  week.setHours(0, 0, 0, 0);
+  week.setDate(week.getDate() - (week.getDay() + 6) % 7);
+  const days = new Set(sessions.filter(s => ['flight', 'sound-alikes'].includes(s.mode) && s.timestamp >= week.getTime()).map(s => new Date(s.timestamp).toDateString())).size;
+  const goal = next?.id === 'backyard-ear' ? 'Recognize your first five backyard birds to earn this badge.' : next?.description;
+  return <section className="ear-progress" aria-labelledby="journey-title">
+    <h2 id="journey-title">Your listening journey</h2>
+    <div className="journey-stats">
+      <div><span>Birds recognized</span><strong>{recognized}</strong><small>4 of 5 correct across two flights</small></div>
+      <div><span>This week</span><strong>{Math.min(days, 3)} <span>of 3 days</span></strong><small>Complete a flight or Sound-alikes</small></div>
+    </div>
+    <div className="journey-badge">
+      <span>{next ? 'Next badge' : 'All badges earned'}</span>
+      <strong>{next ? `${next.icon} ${next.name}` : '✨ What a good ear!'}</strong>
+      {next && <span className="journey-badge-count">{Math.min(next.value, next.target)} of {next.target}{next.id === 'backyard-ear' ? ' birds' : ''}</span>}
+    </div>
+    {goal && <p className="journey-goal">{goal}</p>}
+    <button className="journey-badges-button" onClick={onBadges}>View your badges <span aria-hidden="true">→</span></button>
+  </section>;
+}
+
+function BadgesScreen({ history, sessions, spottedBirds, onHome }) {
+  const badges = badgeProgress(history, sessions, spottedBirds);
+  return <main className="screen collection-screen"><button className="back-button" onClick={onHome}>← Home</button><header className="section-header"><p className="eyebrow">LITTLE MILESTONES</p><h2>Growing a good ear.</h2><p>Recognize a bird with four of five correct answers across at least two flights. Nearby quizzes stay separate. Earned listening badges stay with you.</p></header><div className="badge-grid">{badges.map(b => <article className={`badge-card ${b.value >= b.target ? 'earned' : ''}`} key={b.id}><span className="badge-icon" aria-hidden="true">{b.icon}</span><h3>{b.name}</h3><p>{b.description}</p><strong>{b.value >= b.target ? '✓ Earned' : `${Math.min(b.value, b.target)} / ${b.target}`}</strong><progress max={b.target} value={Math.min(b.value, b.target)} aria-label={b.name} /></article>)}</div></main>;
+}
+
+function AppContent() {
+  const {clips:personalClips} = useRecordings();
+  const [claims,setClaims] = useState(()=>readStoredJSON(WORLD_KEY,[]));
+  const [focusBirdId,setFocusBirdId] = useState(null);
+  const [sessions, setSessions] = useState(() => readStoredJSON("birdsong-sessions-v1", []));
+  const [practiceIds, setPracticeIds] = useState(null);
+  const [practiceOutdoor, setPracticeOutdoor] = useState(false);
+  useEffect(() => localStorage.setItem("birdsong-sessions-v1", JSON.stringify(sessions)), [sessions]);
+  const completeFlight = session => setSessions(current => current.some(s => s.id === session.id) ? current : [...current, session]);
+  const practiceMissed = (ids, outdoor = false) => { setPracticeOutdoor(outdoor); setPracticeIds(ids); setScreen("practice"); };
   const [screen, setScreen] =
     useState("home");
+  useEffect(() => { window.scrollTo({ top: 0, behavior: "instant" }); }, [screen]);
 
   const [nearbyBirdIds, setNearbyBirdIds] =
     useState([]);
@@ -1785,12 +1621,7 @@ export default function App() {
   const [
     discoveredBirds,
     setDiscoveredBirds,
-  ] = useState(() =>
-    readStoredJSON(
-      DISCOVERED_KEY,
-      starterBirds
-    )
-  );
+  ] = useState(() => initialFlock([...readStoredJSON(DISCOVERED_KEY, []),...readStoredJSON(WORLD_KEY,[]).map(c=>c.birdId).filter(Boolean)]));
 
   const [spottedBirds, setSpottedBirds] =
     useState(() =>
@@ -1838,9 +1669,22 @@ export default function App() {
         bird && !discoveredBirds.includes(bird.id)
     );
 
+  function navigate(place) {try {localStorage.setItem('birdsong-last-place-v1',place);} catch { /* navigation still works */ }setScreen(place);}
+  function awardMilestone(id) {
+    const previous=readStoredJSON(WORLD_KEY,[]),claim=claimMilestone(id,discoveredBirds,previous);
+    if(!claim)return;
+    try {const next=[...previous,claim];localStorage.setItem(WORLD_KEY,JSON.stringify(next));setClaims(next);if(claim.birdId)setDiscoveredBirds(current=>[...new Set([...current,claim.birdId])]);const bird=birds.find(b=>b.id===claim.birdId);window.dispatchEvent(new CustomEvent('birdsong-world-reward',{detail:bird?`${bird.commonName} has joined your world. Find your new card in Your Nest.`:'Milestone completed. Every bird in this collection is already with you.'}));}
+    catch {window.dispatchEvent(new CustomEvent('birdsong-world-reward',{detail:'This browser couldn’t save your collection reward. You can try this milestone again.'}));}
+  }
+  if(screen==='advanced')return <AdvancedListening history={history} onHome={()=>setScreen('learn')}/>;
+  const learningProps={onAdvanced:()=>setScreen('advanced'),onHome:()=>setScreen('home'),onPlay:id=>{setFocusBirdId(typeof id==='string'?id:null);setScreen('game');},onPractice:()=>{setPracticeIds(null);setPracticeOutdoor(false);setScreen('practice');},onBadges:()=>setScreen('badges'),onSoundAlikes:()=>setScreen('sound-alikes'),onStudio:()=>navigate('studio'),discoveredBirds,history,sessions,spottedBirds};
+  if(screen==='learn')return <LearnScreen {...learningProps}/>;
+  if(screen==='explore')return <ExploreWorld onHome={()=>setScreen('home')} onListen={()=>setScreen('listen')} onNearby={()=>setScreen('nearby')} onGuide={()=>setScreen('guide')} onCalls={()=>setScreen('calls')} onMilestone={awardMilestone}/>;
+  if(screen==='sanctuary')return <Sanctuary onHome={()=>setScreen('home')} BirdArt={BirdIllustration} discoveredBirds={discoveredBirds} history={history} spottedBirds={spottedBirds} claims={claims} onMilestone={awardMilestone}/>;
+
   function recordGuess(
     birdId,
-    correct
+    correct, details = {}
   ) {
     setHistory((current) => [
       ...current,
@@ -1848,6 +1692,7 @@ export default function App() {
         birdId,
         correct,
         timestamp: Date.now(),
+        ...details,
       },
     ]);
   }
@@ -1861,6 +1706,7 @@ export default function App() {
   }
 
   function setBirdSpotted(birdId, spotted) {
+    if (spotted) setSessions(current => current.some(s => s.mode === "sighting") ? current : [...current, { id: crypto.randomUUID(), mode: "sighting", timestamp: Date.now() }]);
     setSpottedBirds((current) => {
       if (spotted) {
         return current.includes(birdId)
@@ -1886,6 +1732,8 @@ export default function App() {
         onUnlockBird={unlockBird}
         unlockBird={nextUnlockBird || null}
         birdPool={unlockedBirds}
+        personalClips={personalClips} focusBirdId={focusBirdId}
+        history={history} sessions={sessions} spottedBirds={spottedBirds} onComplete={completeFlight} onPracticeMissed={practiceMissed}
       />
     );
   }
@@ -1896,7 +1744,8 @@ export default function App() {
         onHome={() =>
           setScreen("home")
         }
-        birdPool={unlockedBirds}
+        birdPool={practiceIds ? birds.filter(b => practiceIds.includes(b.id)) : unlockedBirds}
+        targeted={Boolean(practiceIds)} outdoor={practiceOutdoor}
       />
     );
   }
@@ -1927,6 +1776,7 @@ export default function App() {
         onGuess={recordGuess}
         birdPool={nearbyPool}
         modeLabel="NEARBY"
+        history={history} sessions={sessions} spottedBirds={spottedBirds} onComplete={completeFlight} onPracticeMissed={practiceMissed}
       />
     );
   }
@@ -1949,6 +1799,16 @@ export default function App() {
     );
   }
 
+  if (import.meta.env.DEV && screen === "listen") return <OutdoorListening onHome={() => setScreen("explore")} BirdArt={BirdIllustration} onPractice={id => practiceMissed([id], true)} />;
+
+  if (screen === "calls") return <main className="screen outdoor-screen"><button className="back-button" onClick={()=>setScreen("explore")}>← Explore</button><RecordingShelf /></main>;
+
+  if (screen === "studio") return <BirdsongStudio onHome={() => setScreen("home")} BirdArt={BirdIllustration} history={history} discoveredBirds={discoveredBirds} onMilestone={awardMilestone} />;
+
+  if (screen === "sound-alikes") return <SoundAlikes onHome={() => setScreen("home")} onComplete={completeFlight} sessions={sessions} BirdArt={BirdIllustration} />;
+
+  if (screen === "badges") return <BadgesScreen history={history} sessions={sessions} spottedBirds={spottedBirds} onHome={() => setScreen("home")} />;
+
   if (screen === "credits") {
     return (
       <CreditsScreen
@@ -1959,24 +1819,8 @@ export default function App() {
     );
   }
 
-  return (
-    <HomeScreen
-      onPlay={() =>
-        setScreen("game")
-      }
-      onPractice={() =>
-        setScreen("practice")
-      }
-      onNearby={() =>
-        setScreen("nearby")
-      }
-      onGuide={() =>
-        setScreen("guide")
-      }
-      onCredits={() =>
-        setScreen("credits")
-      }
-      discoveredBirds={discoveredBirds}
-    />
-  );
+  return <BirdHub BirdArt={BirdIllustration} discoveredBirds={discoveredBirds} onNavigate={navigate} onCredits={()=>setScreen('credits')}/>;
 }
+function WorldRewardNotice(){const [notice,setNotice]=useState('');useEffect(()=>{const show=e=>setNotice(e.detail);window.addEventListener('birdsong-world-reward',show);return()=>window.removeEventListener('birdsong-world-reward',show);},[]);return notice?<aside className="world-reward-notice" aria-label="Collection update"><p role="status">{notice}</p><button aria-label="Dismiss collection update" onClick={()=>setNotice('')}>×</button></aside>:null;}
+
+export default function App() { return <><AppContent /><WorldRewardNotice /><footer className="studio-footer">Designed by 2e Studio</footer></>; }

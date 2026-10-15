@@ -22,3 +22,6 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Downloaded noncommercial BirdNET prototype model
+.birdnet-local/

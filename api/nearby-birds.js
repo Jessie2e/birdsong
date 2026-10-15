@@ -17,18 +17,18 @@ export default async function handler(request, response) {
     });
   }
 
-  const apiKey = process.env.EBIRD_API_KEY;
+  const apiKey = request.ebirdApiKey || process.env.EBIRD_API_KEY;
 
   if (!apiKey) {
     return response.status(503).json({
       error:
-        "Birdsong's eBird connection needs its API key before nearby practice can go live.",
+        "Birdsong's eBird connection needs its API key for live sightings. In the local preview, use “Try sample birds” to test the flow.",
       code: "EBIRD_API_KEY_MISSING",
     });
   }
 
-  const lat = Number(request.query.lat);
-  const lng = Number(request.query.lng);
+  const lat = typeof request.query.lat === 'string' && request.query.lat.trim() ? Number(request.query.lat) : NaN;
+  const lng = typeof request.query.lng === 'string' && request.query.lng.trim() ? Number(request.query.lng) : NaN;
 
   if (
     !Number.isFinite(lat) ||
@@ -59,6 +59,7 @@ export default async function handler(request, response) {
       headers: {
         "X-eBirdApiToken": apiKey,
       },
+      signal: AbortSignal.timeout(12000),
     });
 
     if (!ebirdResponse.ok) {

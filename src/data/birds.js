@@ -1,3 +1,8 @@
+import redShoulderedHawkAudio from "../assets/audio/Red_shouldered_Hawk.ogg";
+import yellowRumpedWarblerAudio from "../assets/audio/Yellow_rumped_Warbler.ogg";
+import easternPhoebeAudio from "../assets/audio/Eastern_Phoebe.ogg";
+import redWingedBlackbirdAudio from "../assets/audio/Red_winged_Blackbird.ogg";
+import americanGoldfinchAudio from "../assets/audio/American_Goldfinch.ogg";
 import cardinalAudio from "../assets/audio/Northern_Cardinal.ogg";
 import robinAudio from "../assets/audio/American_Robin.ogg";
 import bluejayAudio from "../assets/audio/Blue_Jay.ogg";
@@ -29,22 +34,22 @@ const americanCrowAudio =
 // First Birdsong expansion. Keeping the source recordings intact for now;
 // these can be replaced with trimmed/local clips later without changing bird IDs.
 const redBelliedWoodpeckerAudio =
-  "https://commons.wikimedia.org/wiki/Special:Redirect/file/Melanerpes%20carolinus%20-%20Red-bellied%20Woodpecker%20-%20XC71728.ogg";
+  "https://upload.wikimedia.org/wikipedia/commons/0/01/Melanerpes_carolinus_-_Red-bellied_Woodpecker_-_XC71728.ogg";
 
 const barredOwlAudio =
-  "https://commons.wikimedia.org/wiki/Special:Redirect/file/Barred%20Owl%20%28Strix%20varia%29%20%28W1CDR0000351%20BD27%29.ogg";
+  "https://upload.wikimedia.org/wikipedia/commons/4/4a/Barred_Owl_%28Strix_varia%29_%28W1CDR0000351_BD27%29.ogg";
 
 const easternTowheeAudio =
-  "https://commons.wikimedia.org/wiki/Special:Redirect/file/Pipilo%20erythrophthalmus%20-%20Eastern%20Towhee%20-%20XC81298.ogg";
+  "https://upload.wikimedia.org/wikipedia/commons/f/f7/Pipilo_erythrophthalmus_-_Eastern_Towhee_-_XC81298.ogg";
 
 const killdeerAudio =
-  "https://commons.wikimedia.org/wiki/Special:Redirect/file/Charadrius%20vociferus.ogg";
+  "https://upload.wikimedia.org/wikipedia/commons/9/97/Charadrius_vociferus.ogg";
 
 const northernMockingbirdAudio =
-  "https://commons.wikimedia.org/wiki/Special:Redirect/file/Mimus%20polyglottos%20Northern%20Mockingbird.ogg";
+  "https://upload.wikimedia.org/wikipedia/commons/3/3c/Mimus_polyglottos_Northern_Mockingbird.ogg";
 
 const carolinaChickadeeAudio =
-  "https://commons.wikimedia.org/wiki/Special:Redirect/file/Carolina%20Chickadee.ogg";
+  "https://upload.wikimedia.org/wikipedia/commons/e/e4/Carolina_Chickadee.ogg";
 
 export const birds = [
   {
@@ -351,5 +356,121 @@ export const birds = [
       beak: "#222525",
     },
     toneSequence: [900, 740, 690, 690, 690],
+  },
+
+  {
+      "id": "red-shouldered-hawk",
+      "commonName": "Red-shouldered Hawk",
+      "scientificName": "Buteo lineatus",
+      "audio": redShoulderedHawkAudio,
+      "mnemonic": "Kee-aah! Kee-aah!",
+      "fact": "Red-shouldered Hawks live in wooded habitats, including forests along rivers and swamps.",
+      "habitat": "Woodlands, river bottoms & wooded neighborhoods",
+      "difficulty": 2,
+      "colors": {
+          "body": "#b58b65",
+          "head": "#80644e",
+          "wing": "#705b4c",
+          "beak": "#d2a349"
+      },
+      "toneSequence": [
+          920,
+          650,
+          920,
+          650
+      ]
+  },
+
+  {
+      "id": "yellow-rumped-warbler",
+      "commonName": "Yellow-rumped Warbler",
+      "scientificName": "Setophaga coronata",
+      "audio": yellowRumpedWarblerAudio,
+      "mnemonic": "A sweet warble with a quicker finish",
+      "fact": "Yellow-rumped Warblers can digest the waxy coating of bayberries, helping them find food through winter.",
+      "habitat": "Woodland edges, conifer forests & winter berry patches",
+      "difficulty": 3,
+      "colors": {
+          "body": "#8d9696",
+          "head": "#687376",
+          "wing": "#424d52",
+          "beak": "#343b3b"
+      },
+      "toneSequence": [
+          820,
+          850,
+          870,
+          890,
+          900
+      ]
+  },
+
+  {
+      "id": "eastern-phoebe",
+      "commonName": "Eastern Phoebe",
+      "scientificName": "Sayornis phoebe",
+      "audio": easternPhoebeAudio,
+      "mnemonic": "Fee-bee! Fee-brr!",
+      "fact": "Eastern Phoebes often bob their tails and build nests beneath bridges, porches, and other sheltered ledges.",
+      "habitat": "Open woodland, stream edges, bridges & porches",
+      "difficulty": 1,
+      "colors": {
+          "body": "#817b69",
+          "head": "#4c5149",
+          "wing": "#5e6052",
+          "beak": "#303832"
+      },
+      "toneSequence": [
+          780,
+          600,
+          780,
+          670
+      ]
+  },
+
+  {
+      "id": "red-winged-blackbird",
+      "commonName": "Red-winged Blackbird",
+      "scientificName": "Agelaius phoeniceus",
+      "audio": redWingedBlackbirdAudio,
+      "mnemonic": "Conk-la-reeee!",
+      "fact": "Male Red-winged Blackbirds often show off their red shoulder patches while singing from a high perch.",
+      "habitat": "Marshes, wet meadows, pond edges & fields",
+      "difficulty": 1,
+      "colors": {
+          "body": "#303736",
+          "head": "#242b2c",
+          "wing": "#202727",
+          "beak": "#303736"
+      },
+      "toneSequence": [
+          480,
+          680,
+          880,
+          880
+      ]
+  },
+
+  {
+      "id": "american-goldfinch",
+      "commonName": "American Goldfinch",
+      "scientificName": "Spinus tristis",
+      "audio": americanGoldfinchAudio,
+      "mnemonic": "Po-ta-to-chip!",
+      "fact": "American Goldfinches nest later in summer, when thistles and other plants have gone to seed.",
+      "habitat": "Weedy fields, gardens, open woodland & feeders",
+      "difficulty": 2,
+      "colors": {
+          "body": "#e6c64d",
+          "head": "#e8c943",
+          "wing": "#343d3a",
+          "beak": "#dba765"
+      },
+      "toneSequence": [
+          790,
+          860,
+          820,
+          900
+      ]
   },
 ];
