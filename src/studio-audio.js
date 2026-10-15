@@ -36,11 +36,11 @@ export class StudioAudio {
     osc.connect(gain); gain.connect(this.context.destination); this.nodes.add(osc);
     osc.onended = () => {this.nodes.delete(osc); osc.disconnect(); gain.disconnect();}; osc.start(when); osc.stop(when + .16);
   }
-  async preview(bird, start, length, pitch = 0) {
+  async preview(bird, start, length, pitch = 0, gain = .7) {
     const token = this.generation;
     await this.context.resume(); const buffer = await this.load(bird);
     if (token !== this.generation) return 0;
-    this.sound(excerpt(buffer, start, length, this.context), this.context.currentTime + .03, .7, pitch);
+    this.sound(excerpt(buffer, start, length, this.context), this.context.currentTime + .03, gain, pitch);
     return Math.min(length, buffer.duration - start);
   }
   async previewChirp(bird,length=.65) {const token=this.generation;await this.context.resume();const buffer=await this.load(bird);if(token!==this.generation)return;const key=`${bird.id}:${bird.audio}:${length}`;if(!this.chirps.has(key)){const section=oracleExcerpt(buffer,length);this.chirps.set(key,excerpt(buffer,section.start,section.duration,this.context));}this.sound(this.chirps.get(key),this.context.currentTime+.03,.7);}
