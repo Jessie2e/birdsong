@@ -67,7 +67,7 @@ export default function OutdoorListening({ onHome, BirdArt, onPractice }) {
     instance.postMessage({type:'region',requestId,points:ALABAMA_POINTS,week:seasonWeek()});
   }
   function load() {
-    setStatus('loading'); setMessage('Loading your listening kit… This first download is about 50 MB.');
+    setStatus('loading'); setMessage('Loading your listening kit… This first download is about 57 MB; Wi-Fi is recommended.');
     worker.current?.terminate(); ready.current = false; setModelReady(false); setRangeScores(null); setRangeStatus(regionRef.current === 'world' ? 'idle' : 'waiting');
     const instance = new Worker(new URL('./listening.worker.js', import.meta.url), {type:'module'});
     worker.current = instance;
@@ -76,7 +76,7 @@ export default function OutdoorListening({ onHome, BirdArt, onPractice }) {
     instance.onmessage = ({data}) => {
       if (!mounted.current || worker.current !== instance) return;
       if (data.type === 'progress') setMessage(`Loading your listening kit… ${Math.round(data.value * 100)}%`);
-      if (data.type === 'ready') { clearTimeout(workTimeout.current); ready.current = true; setModelReady(true); setStatus('ready'); setMessage('Ready when you are. Find a quiet spot and listen for a clear call.'); requestRegion(regionRef.current,instance); }
+      if (data.type === 'ready') { clearTimeout(workTimeout.current); ready.current = true; setModelReady(true); setStatus('ready'); setMessage(data.backend === 'cpu' ? 'Your kit is ready. This device uses slower analysis; start with a short 3–10 second clip.' : 'Ready when you are. Find a quiet spot and listen for a clear call.'); requestRegion(regionRef.current,instance); }
       if (data.type === 'region-result' && data.requestId === rangeRequest.current) {setRangeScores(data.scores); setRangeStatus('ready');}
       if (data.type === 'region-error' && data.requestId === rangeRequest.current) {setRangeScores(null); setRangeStatus('error');}
       if (data.type === 'analyzing') setMessage(`Finding voices… ${Math.round(data.value * 100)}%`);
@@ -165,7 +165,7 @@ export default function OutdoorListening({ onHome, BirdArt, onPractice }) {
     <button className="back-button" onClick={onHome}>← Explore</button>
     <p className="eyebrow">TAKE YOUR EAR OUTSIDE · BETA</p>
     <h1>Who’s singing?</h1>
-    <p>Record a little birdsong. Discover a voice. Learn it for your next walk.</p>
+    <p>Record a little birdsong. Discover a voice. Learn it for your next walk.</p><p className="world-small-note">Free noncommercial listening beta. The kit downloads about 57 MB when you load it. Your audio is analyzed on this device; start with a short clip and keep this page open while it works.</p>
     <div className="listening-region"><label>Listening region<select aria-label="Listening region" value={region} onChange={event => {audio.current?.pause(); requestRegion(event.target.value);}}><option value="world">Worldwide · no range filter</option><option value="alabama">Alabama · seasonal range filter</option></select></label><small role="status">{region === 'world' ? 'Worldwide guesses can include birds unlikely in your area.' : rangeStatus === 'ready' ? 'Alabama seasonal filter active. Rare visitors may be hidden; switch to Worldwide to review them. Audio scores are unchanged.' : rangeStatus === 'error' ? 'Range filter unavailable. Reload your kit or choose Worldwide; regional suggestions are hidden.' : rangeStatus === 'loading' ? 'Loading Alabama’s seasonal range filter…' : 'Alabama selected. Load your listening kit to apply the filter.'}</small></div>
     <details className="listening-kit" open={!visibleMatches?.length}><summary>{visibleMatches?.length ? "Record another voice or choose a clip" : "Your outdoor listening kit"}</summary>
       <div aria-label="Outdoor recording">
@@ -197,6 +197,6 @@ export default function OutdoorListening({ onHome, BirdArt, onPractice }) {
     </>}
     <RecordingShelf blob={keeping?.blob} match={keeping?.match} onClose={()=>setKeeping(null)} />
     <section className="heard-list"><h2>Your heard list · {heard.length}</h2><p>Your confirmed outdoor discoveries. Your game flock still grows through 80% flights.</p>{heard.length > 0 && <ul>{heard.map(item => <li key={item.scientificName}>{item.name}</li>)}</ul>}</section>
-    <p className="listening-credit">Powered by <a href="https://birdnet.cornell.edu/" target="_blank" rel="noreferrer">BirdNET</a>, Cornell Lab of Ornithology and Chemnitz University of Technology. Model: <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank" rel="noreferrer">CC BY-NC-SA 4.0</a>. Local educational prototype.</p>
+    <p className="listening-credit">Powered by <a href="https://birdnet.cornell.edu/" target="_blank" rel="noreferrer">BirdNET</a>, Cornell Lab of Ornithology and Chemnitz University of Technology. Model: <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank" rel="noreferrer">CC BY-NC-SA 4.0</a>. Noncommercial educational beta · independent of BirdNET. <a href="/birdnet/ATTRIBUTION.txt" target="_blank" rel="noreferrer">Model credits</a> · <a href="/birdnet/LICENSE.txt" target="_blank" rel="noreferrer">Full model license</a>.</p>
   </main>;
 }

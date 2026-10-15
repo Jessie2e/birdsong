@@ -56,3 +56,9 @@ The latest shared collection rules supersede earlier learning-only Studio gates.
 ## Phrase workshop and musical memory
 
 Make Music now includes an independent phrase workshop with catalog sources, saved calls/phrases and local file import. Edited audio is explicitly named and saved as a WAV, retaining its attribution and pitch-edit provenance. A phrase with any inherited or new pitch edit is permanently music-only within Birdsong. Unpitched, assigned and explicitly confirmed phrases can opt into future flights; the recording writer and flight planner both enforce eligibility. The original saved call is never overwritten by editing a copy. Existing songs remain local arrangement recipes and can be reopened in the DJ station. Bird Memory is a separate four-pad sequence game with local best scores and manual playback; it changes neither field identifications nor flight accuracy.
+
+## Hosted noncommercial beta (October 2026)
+
+This section supersedes earlier development-only distribution notes. Listen outside is now enabled in the production app for the free noncommercial educational test. The existing model files and labels are redistributed unchanged in public/birdnet; ATTRIBUTION.txt, LICENSE.txt and SOURCES.json preserve attribution, full CC BY-NC-SA 4.0 terms, upstream URLs and SHA-256 hashes. Automated tests verify all distributed assets and referenced shards. No paid/commercial permission has been obtained; commercial release would require an appropriate license or replacement model.
+
+Users explicitly load the ~57 MB kit. Inference and audio remain on the device, with no automatic recording. Worker WebGL falls back to CPU; short clips are recommended if analysis is slow. Physical iOS/Android hardware and outdoor accuracy require user testing. Existing region filtering, confidence caveats, opt-in saved calls and cancellation remain in place.

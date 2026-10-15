@@ -31,12 +31,15 @@ let model, labels, areaModelPromise;
 self.onmessage = async ({ data }) => {
   try {
     if (data.type === 'load') {
-      await tf.setBackend('webgl'); await tf.ready();
+      let accelerated = false;
+      try { accelerated = await tf.setBackend('webgl'); } catch { /* Worker graphics are unavailable on some phones. */ }
+      if (!accelerated) await tf.setBackend('cpu');
+      await tf.ready();
       model = await tf.loadLayersModel('/birdnet/model.json', {onProgress: value => self.postMessage({type:'progress', value})});
       const response = await fetch('/birdnet/labels.txt');
       if (!response.ok) throw new Error('Species labels are unavailable.');
       labels = (await response.text()).trim().split('\n');
-      self.postMessage({type:'ready'});
+      self.postMessage({type:'ready',backend:tf.getBackend()});
     } else if (data.type === 'region') {
       if (!labels) throw new Error('Load the listening kit first.');
       areaModelPromise ||= tf.loadGraphModel('/birdnet/area-model/model.json').catch(error => {areaModelPromise = null; throw error;});

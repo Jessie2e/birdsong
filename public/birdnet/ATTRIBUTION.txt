@@ -1,0 +1,11 @@
+BirdNET browser sound-identification and geographic-range models, with English labels.
+Developed by the Cornell Lab of Ornithology and Chemnitz University of Technology.
+Model files and labels are redistributed unchanged. See SOURCES.json for original URLs and SHA-256 checksums.
+License: Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International (CC BY-NC-SA 4.0).
+https://creativecommons.org/licenses/by-nc-sa/4.0/
+Full terms: LICENSE.txt
+Source: https://birdnet.cornell.edu/models/birdnet/
+Project: https://birdnet.cornell.edu/
+Published terms: https://github.com/birdnet-team/BirdNET-Analyzer#license
+Citation: Kahl, S., Wood, C. M., Eibl, M., & Klinck, H. (2021). BirdNET: A deep learning solution for avian diversity monitoring. Ecological Informatics, 61, 101236.
+Birdsong is an independent noncommercial educational beta and is not endorsed by BirdNET.

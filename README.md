@@ -35,7 +35,7 @@ Home now offers Explore, Play & Learn, Make Music and Your Nest with equal promi
 
 Eight starter birds remain available and existing collections are preserved. A successful 80% flight still welcomes the next bird. Four one-time milestones also welcome the next bird in the same unlock order: a first 20-character field note, a saved arrangement with three distinct enabled phrases after a full loop, a 5/6 Studio phrase challenge, and companion activities on three distinct local dates (no consecutive-day requirement). Welcomed birds are usable in Studio and as companions; voice recognition is a separate flight-earned card mark. The shared reward ledger (`birdsong-world-milestones-v1`) prevents repeatedly claiming the same milestone and recovers awarded birds if the older flock key is absent.
 
-Your Nest includes paginated collection cards, a selectable/named companion, three habitats, manual call playback and a short quiet visit. Daily food, rest, freshness and movement meters reward care without decay or absence penalties. Field notes and companion care are saved locally. There are no accounts or card trading, and the oracle offers original playful reflections. Outdoor recognition remains the existing development-only prototype.
+Your Nest includes paginated collection cards, a selectable/named companion, three habitats, manual call playback and a short quiet visit. Daily food, rest, freshness and movement meters reward care without decay or absence penalties. Field notes and companion care are saved locally. There are no accounts or card trading, and the oracle offers original playful reflections. Outdoor recognition is available as a hosted noncommercial beta.
 
 ## Music stations and phrase safety
 
@@ -57,4 +57,6 @@ The oracle has separate readings: companion playback sequences three 1.8-second 
 
 ## Sharing
 
-The established production address is https://birdsong-iota.vercel.app, connected to Jessie2e/birdsong on main. The production build includes the hub, learning, music, Your Nest and server handlers in api/. Listen outside and downloaded BirdNET models remain local-only; do not publish .birdnet-local or secrets. Live eBird results require EBIRD_API_KEY configured on the host. Progress, phrases and recordings are browser-local and do not sync between devices or domains.
+The established production address is https://birdsong-iota.vercel.app, connected to Jessie2e/birdsong on main. The production build includes the hub, learning, music, Your Nest and server handlers in api/. Listen outside is available as a free noncommercial beta. Unmodified BirdNET assets are hosted in public/birdnet with attribution, full license and source checksums. Keep .birdnet-local and secrets out of Git. Live eBird results require EBIRD_API_KEY configured on the host. Progress, phrases and recordings are browser-local and do not sync between devices or domains.
+
+Hosted listening downloads the ~57 MB kit only on request. Recording and inference stay in the browser. Worker WebGL falls back to CPU when unavailable; short clips are recommended on slower phones. No automatic microphone access or audio uploads are introduced. A physical iPhone/Android microphone test is still required.

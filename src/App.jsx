@@ -1799,7 +1799,7 @@ function AppContent() {
     );
   }
 
-  if (import.meta.env.DEV && screen === "listen") return <OutdoorListening onHome={() => setScreen("explore")} BirdArt={BirdIllustration} onPractice={id => practiceMissed([id], true)} />;
+  if (screen === "listen") return <OutdoorListening onHome={() => setScreen("explore")} BirdArt={BirdIllustration} onPractice={id => practiceMissed([id], true)} />;
 
   if (screen === "calls") return <main className="screen outdoor-screen"><button className="back-button" onClick={()=>setScreen("explore")}>← Explore</button><RecordingShelf /></main>;
 
