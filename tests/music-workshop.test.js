@@ -5,7 +5,7 @@ import {phraseProvenance,renderPhrase} from '../src/phrase-audio.js';
 import {personalRounds} from '../src/personal-recordings.js';
 import {appendMemoryNote,memoryAnswer} from '../src/bird-memory.js';
 test('pitch history survives editing a copy and always excludes a phrase from learning',()=>{
- const p={kind:'phrase',birdId:'cardinal',confirmed:true,pitchEdited:false};assert.equal(learningEligible(p),true);assert.equal(learningEligible({...p,confirmed:false}),false);assert.equal(learningEligible({...p,birdId:null}),false);
+ const p={kind:'phrase',birdId:'cardinal',confirmed:true,pitchEdited:false,duration:1};assert.equal(learningEligible(p),true);assert.equal(learningEligible({...p,confirmed:false}),false);assert.equal(learningEligible({...p,birdId:null}),false);
  assert.equal(phraseProvenance({},5).pitchEdited,true);assert.equal(phraseProvenance({},0,true).pitchEdited,true);assert.equal(phraseProvenance({pitchEdited:true},0).pitchEdited,true);assert.equal(learningEligible({...p,pitchEdited:true,enabled:true}),false);
  const result=personalRounds([{correct:{id:'cardinal',audio:'reference'}}],[{...p,pitchEdited:true,enabled:true,audio:'shifted',id:'x'}],()=>0);assert.equal(result[0].correct.audio,'reference');
 });

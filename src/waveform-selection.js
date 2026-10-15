@@ -1,4 +1,4 @@
-export const MIN_PHRASE = .5;
+export const MIN_PHRASE = .05;
 export const MAX_PHRASE = 30;
 const clamp=(value,min,max)=>Math.max(min,Math.min(max,value));
 export function resizeSelection(selection,edge,time,duration) {

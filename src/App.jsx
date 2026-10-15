@@ -128,7 +128,7 @@ function BirdIllustration({ bird, small = false }) {
 }
 
 function LearnScreen({onHome,onPlay,onPractice,onBadges,onSoundAlikes,onStudio,onAdvanced,discoveredBirds,history,sessions,spottedBirds}) {
- return <main className="world-screen screen"><button className="back-button" onClick={onHome}>← Birdsong</button><header className="world-header"><p className="eyebrow">A LITTLE CHALLENGE. A GROWING EAR.</p><h1>Play & Learn.</h1><p>Get to know the voices around you, one little flight at a time.</p></header><section className="flight-start-card"><p className="eyebrow">YOUR NEXT FLIGHT</p><h2>Ten calls. How many do you know?</h2><p>A flight is a short listening quiz: play a bird call, then choose its name. There’s no timer. Score <strong>8 out of 10</strong> to welcome the next bird into your shared collection.</p><button className="primary-button" onClick={onPlay}>Start a 10-question flight <span>→</span></button><small>Welcomed birds are yours to enjoy in Studio and Your Nest. You can also welcome birds through music, field notes and companion visits.</small></section><details className="learning-explainer"><summary>What does “voice recognized” mean?</summary><p>It means you’re getting familiar with a bird by ear: at least four correct answers in a group of five attempts, spread over two or more flights. It adds a recognition mark to that bird’s collection card, helps you track what you know, and gives developing voices more priority in future flights. Your learning badges celebrate these milestones too. Recognize two birds to open A sharper ear, with short phrases and two-voice challenges toward Mastered by ear.</p><p>Welcoming a bird adds it to your collection. Recognizing its voice records what you’ve learned about it.</p></details><NextAdventure birds={birds} history={history} sessions={sessions} discoveredBirds={discoveredBirds} onPlay={onPlay} onStudio={onStudio} onSoundAlikes={onSoundAlikes}/><div className="world-actions"><button onClick={onPractice}><strong>Practice calls</strong><span>Listen freely to the birds in your collection</span></button><button onClick={onSoundAlikes}><strong>Sound-alikes</strong><span>Learn what makes two voices different</span></button></div><section className="world-panel"><h2>A sharper ear</h2><p>Recognize two voices to open short-phrase and two-voice challenges. Learn both to earn Mastered by ear, and earn extra Pip species changes along the way.</p><button onClick={onAdvanced}>Explore advanced listening →</button></section><ProgressSummary history={history} sessions={sessions} spottedBirds={spottedBirds} onBadges={onBadges}/></main>;
+ return <main className="world-screen screen"><button className="back-button" onClick={onHome}>← Birdsong</button><header className="world-header"><p className="eyebrow">A LITTLE CHALLENGE. A GROWING EAR.</p><h1>Play & Learn.</h1><p>Get to know the voices around you, one little flight at a time.</p></header><section className="flight-start-card"><p className="eyebrow">YOUR NEXT FLIGHT</p><h2>Ten calls. How many do you know?</h2><p>A flight is a short listening quiz: play a bird call, then choose its name. There’s no timer. Score <strong>8 out of 10</strong> to welcome the next bird into your Flock.</p><button className="primary-button" onClick={onPlay}>Start a 10-question flight <span>→</span></button><small>Welcomed birds are yours to enjoy in Studio and Your Nest. You can also welcome birds through music, field notes and companion visits.</small></section><details className="learning-explainer"><summary>What does “voice recognized” mean?</summary><p>It means you’re getting familiar with a bird by ear: at least four correct answers in a group of five attempts, spread over two or more flights. It adds a recognition mark to that bird’s Flock card, helps you track what you know, and gives developing voices more priority in future flights. Your learning badges celebrate these milestones too. Recognize two birds to open A sharper ear, with short phrases and two-voice challenges toward Mastered by ear.</p><p>Welcoming a bird adds it to your Flock. Recognizing its voice records what you’ve learned about it.</p></details><NextAdventure birds={birds} history={history} sessions={sessions} discoveredBirds={discoveredBirds} onPlay={onPlay} onStudio={onStudio} onSoundAlikes={onSoundAlikes}/><div className="world-actions"><button onClick={onPractice}><strong>Practice calls</strong><span>Listen freely to the birds in your Flock</span></button><button onClick={onSoundAlikes}><strong>Sound-alikes</strong><span>Learn what makes two voices different</span></button></div><section className="world-panel"><h2>A sharper ear</h2><p>Recognize two voices to open short-phrase and two-voice challenges. Learn both to earn Mastered by ear, and earn extra Bird Bestie species changes along the way.</p><button onClick={onAdvanced}>Explore advanced listening →</button></section><ProgressSummary history={history} sessions={sessions} spottedBirds={spottedBirds} onBadges={onBadges}/></main>;
 }
 
 function GameScreen({
@@ -355,7 +355,7 @@ function toggleUnlockedBirdSound() {
           className="back-button"
           onClick={goHome}
         >
-          ← Home
+          ← {modeLabel?"Birds nearby":"Play & Learn"}
         </button>
 
         <div className="results-card">
@@ -432,7 +432,7 @@ function toggleUnlockedBirdSound() {
             className="text-button"
             onClick={goHome}
           >
-            Back Home
+            Back to {modeLabel?"Birds nearby":"Play & Learn"}
           </button>
         </div>
       </main>
@@ -711,7 +711,7 @@ function PracticeScreen({ onHome, birdPool, targeted = false, outdoor = false })
         className="back-button"
         onClick={goHome}
       >
-        ← Home
+        ← {outdoor?"Listen outside":"Play & Learn"}
       </button>
 
       <header className="section-header">
@@ -953,7 +953,7 @@ function NearbyScreen({
   return (
     <main className="screen collection-screen nearby-screen">
       <button className="back-button" onClick={onHome}>
-        ← Home
+        ← Explore
       </button>
 
       <header className="section-header nearby-header">
@@ -1166,7 +1166,7 @@ function FieldGuideScreen({
   onStartFresh,
 }) {
   const [period, setPeriod] = useState("fresh");
-  const [guideFilter, setGuideFilter] = useState("flock");
+  const [guideFilter, setGuideFilter] = useState("all");
   const [search, setSearch] = useState("");
   const now = new Date();
   const thisMonth = new Date(now.getFullYear(), now.getMonth(), 1).getTime();
@@ -1212,7 +1212,7 @@ function FieldGuideScreen({
         className="back-button"
         onClick={onHome}
       >
-        ← Home
+        ← Explore
       </button>
 
       <header className="section-header guide-header">
@@ -1220,7 +1220,7 @@ function FieldGuideScreen({
           FIELD GUIDE
         </p>
 
-        <h2>Your birds.</h2>
+        <h2>Your Flock.</h2>
 
         <p>
           {discoveredCount} / {birds.length} species
@@ -1249,9 +1249,10 @@ function FieldGuideScreen({
 
       <div className="guide-tools">
         <label>Find a bird<input value={search} onChange={e => setSearch(e.target.value)} placeholder="Search names" /></label>
-        <label>Show<select value={guideFilter} onChange={e => setGuideFilter(e.target.value)}><option value="flock">My flock</option><option value="all">All birds</option><option value="review">Needs review</option><option value="recognized">Recognized</option><option value="spotted">Spotted</option></select></label>
+        <label>Show<select value={guideFilter} onChange={e => setGuideFilter(e.target.value)}><option value="flock">My flock</option><option value="all">All birds</option><option value="review">Still learning</option><option value="recognized">👂 Recognized by ear</option><option value="spotted">👁 Spotted</option></select></label>
         <label>Accuracy period<select value={period} onChange={e => setPeriod(e.target.value)}><option value="fresh">Since fresh start</option><option value="month">This month</option><option value="last">Last month</option><option value="all">All time</option></select></label>
       </div>
+      <p className="guide-filter-help">👂 Recognized: four correct answers in five attempts over at least two flights. 👁 Spotted: a sighting you marked yourself. Still learning: birds in your Flock without an ear mark yet.</p>
       {visibleBirds.length === 0 && <p className="guide-empty" role="status">No birds match yet. Try another filter or search.</p>}
       <div className="guide-grid">
         {visibleBirds.map((bird) => {
@@ -1294,6 +1295,7 @@ function FieldGuideScreen({
               onKeyDown={
                 unlocked
                   ? (event) => {
+                      if (event.target !== event.currentTarget) return;
                       if (
                         event.key === "Enter" ||
                         event.key === " "
@@ -1313,7 +1315,7 @@ function FieldGuideScreen({
               }
             >
               <div className="guide-card-inner">
-                <div className="guide-card-face guide-card-front">
+                <div className="guide-card-face guide-card-front" aria-hidden={flipped} inert={flipped}>
                   <div className="guide-art">
                     <BirdIllustration
                       bird={bird}
@@ -1329,7 +1331,8 @@ function FieldGuideScreen({
 
                   {unlocked ? (
                     <>
-                      <span className="recognition-chip">{recognition(history, bird.id) ? "✓ Recognized" : "♪ Learning"}</span>
+                      <span className="recognition-chip">{recognition(history, bird.id) ? "👂 Recognized by ear" : "♪ Learning"}</span>
+                      {spottedBirds.includes(bird.id)&&<span className="recognition-chip">👁 Spotted outside</span>}
                       <p className="difficulty">
                         {"●".repeat(
                           bird.difficulty
@@ -1372,7 +1375,7 @@ function FieldGuideScreen({
                   )}
                 </div>
 
-                <div className="guide-card-face guide-card-back">
+                <div className="guide-card-face guide-card-back" aria-hidden={!flipped} inert={!flipped}>
                   <p className="eyebrow">
                     {bird.commonName}
                   </p>
@@ -1460,9 +1463,7 @@ function FieldGuideScreen({
                     </div>
                   </div>
 
-                  <span className="flip-hint">
-                    Back to bird ↻
-                  </span>
+                  <button className="flip-hint" onClick={event=>{event.stopPropagation();setFlippedBirdId(null);}}>Back to bird ↻</button>
                 </div>
               </div>
             </article>
@@ -1673,8 +1674,8 @@ function AppContent() {
   function awardMilestone(id) {
     const previous=readStoredJSON(WORLD_KEY,[]),claim=claimMilestone(id,discoveredBirds,previous);
     if(!claim)return;
-    try {const next=[...previous,claim];localStorage.setItem(WORLD_KEY,JSON.stringify(next));setClaims(next);if(claim.birdId)setDiscoveredBirds(current=>[...new Set([...current,claim.birdId])]);const bird=birds.find(b=>b.id===claim.birdId);window.dispatchEvent(new CustomEvent('birdsong-world-reward',{detail:bird?`${bird.commonName} has joined your world. Find your new card in Your Nest.`:'Milestone completed. Every bird in this collection is already with you.'}));}
-    catch {window.dispatchEvent(new CustomEvent('birdsong-world-reward',{detail:'This browser couldn’t save your collection reward. You can try this milestone again.'}));}
+    try {const next=[...previous,claim];localStorage.setItem(WORLD_KEY,JSON.stringify(next));setClaims(next);if(claim.birdId)setDiscoveredBirds(current=>[...new Set([...current,claim.birdId])]);const bird=birds.find(b=>b.id===claim.birdId);window.dispatchEvent(new CustomEvent('birdsong-world-reward',{detail:bird?`${bird.commonName} has joined your world. Find your new card in Your Nest.`:'Milestone completed. Every bird in this Flock is already with you.'}));}
+    catch {window.dispatchEvent(new CustomEvent('birdsong-world-reward',{detail:'This browser couldn’t save your Flock reward. You can try this milestone again.'}));}
   }
   if(screen==='advanced')return <AdvancedListening history={history} onHome={()=>setScreen('learn')}/>;
   const learningProps={onAdvanced:()=>setScreen('advanced'),onHome:()=>setScreen('home'),onPlay:id=>{setFocusBirdId(typeof id==='string'?id:null);setScreen('game');},onPractice:()=>{setPracticeIds(null);setPracticeOutdoor(false);setScreen('practice');},onBadges:()=>setScreen('badges'),onSoundAlikes:()=>setScreen('sound-alikes'),onStudio:()=>navigate('studio'),discoveredBirds,history,sessions,spottedBirds};
@@ -1726,7 +1727,7 @@ function AppContent() {
     return (
       <GameScreen
         onHome={() =>
-          setScreen("home")
+          setScreen("learn")
         }
         onGuess={recordGuess}
         onUnlockBird={unlockBird}
@@ -1742,7 +1743,7 @@ function AppContent() {
     return (
       <PracticeScreen
         onHome={() =>
-          setScreen("home")
+          setScreen(practiceOutdoor?"listen":"learn")
         }
         birdPool={practiceIds ? birds.filter(b => practiceIds.includes(b.id)) : unlockedBirds}
         targeted={Boolean(practiceIds)} outdoor={practiceOutdoor}
@@ -1753,7 +1754,7 @@ function AppContent() {
   if (screen === "nearby") {
     return (
       <NearbyScreen
-        onHome={() => setScreen("home")}
+        onHome={() => setScreen("explore")}
         spottedBirds={spottedBirds}
         onStartPractice={(nearbyMatches) => {
           setNearbyBirdIds(
@@ -1785,7 +1786,7 @@ function AppContent() {
     return (
       <FieldGuideScreen
         onHome={() =>
-          setScreen("home")
+          setScreen("explore")
         }
         history={history}
         resetAt={resetAt}
@@ -1805,9 +1806,9 @@ function AppContent() {
 
   if (screen === "studio") return <BirdsongStudio onHome={() => setScreen("home")} BirdArt={BirdIllustration} history={history} discoveredBirds={discoveredBirds} onMilestone={awardMilestone} />;
 
-  if (screen === "sound-alikes") return <SoundAlikes onHome={() => setScreen("home")} onComplete={completeFlight} sessions={sessions} BirdArt={BirdIllustration} />;
+  if (screen === "sound-alikes") return <SoundAlikes onHome={() => setScreen("learn")} onComplete={completeFlight} sessions={sessions} BirdArt={BirdIllustration} />;
 
-  if (screen === "badges") return <BadgesScreen history={history} sessions={sessions} spottedBirds={spottedBirds} onHome={() => setScreen("home")} />;
+  if (screen === "badges") return <BadgesScreen history={history} sessions={sessions} spottedBirds={spottedBirds} onHome={() => setScreen("learn")} />;
 
   if (screen === "credits") {
     return (
@@ -1821,6 +1822,6 @@ function AppContent() {
 
   return <BirdHub BirdArt={BirdIllustration} discoveredBirds={discoveredBirds} onNavigate={navigate} onCredits={()=>setScreen('credits')}/>;
 }
-function WorldRewardNotice(){const [notice,setNotice]=useState('');useEffect(()=>{const show=e=>setNotice(e.detail);window.addEventListener('birdsong-world-reward',show);return()=>window.removeEventListener('birdsong-world-reward',show);},[]);return notice?<aside className="world-reward-notice" aria-label="Collection update"><p role="status">{notice}</p><button aria-label="Dismiss collection update" onClick={()=>setNotice('')}>×</button></aside>:null;}
+function WorldRewardNotice(){const [notice,setNotice]=useState('');useEffect(()=>{const show=e=>setNotice(e.detail);window.addEventListener('birdsong-world-reward',show);return()=>window.removeEventListener('birdsong-world-reward',show);},[]);return notice?<aside className="world-reward-notice" aria-label="Flock update"><p role="status">{notice}</p><button aria-label="Dismiss Flock update" onClick={()=>setNotice('')}>×</button></aside>:null;}
 
-export default function App() { return <><AppContent /><WorldRewardNotice /><footer className="studio-footer">Designed by 2e Studio</footer></>; }
+export default function App() { return <><div className="world-clouds" aria-hidden="true"><span className="cloud cloud-one"/><span className="cloud cloud-two"/><span className="cloud cloud-three"/></div><AppContent /><WorldRewardNotice /><footer className="studio-footer">Designed by 2e Studio</footer></>; }

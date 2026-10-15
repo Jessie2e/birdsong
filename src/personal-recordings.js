@@ -8,8 +8,12 @@ async function transact(mode, action) {
   const db=await database();
   try {return await new Promise((resolve,reject)=>{const tx=db.transaction('clips',mode), request=action(tx.objectStore('clips'));let result;request.onsuccess=()=>{result=request.result;};tx.oncomplete=()=>{if(mode==='readwrite')window.dispatchEvent(new Event('birdsong-recordings-changed'));resolve(result);};tx.onerror=()=>reject(tx.error||request.error||new Error("Storage unavailable"));tx.onabort=()=>reject(tx.error||new Error('Storage unavailable'));});} finally {db.close();}
 }
-export const listRecordings=()=>transact('readonly',store=>store.getAll());
-export const putRecording=recording=>transact('readwrite',store=>store.put({...recording,enabled:!!recording.enabled&&learningEligible(recording)}));
+// Safari can reject Blob/File values in IndexedDB. Store plain bytes instead;
+// hydrate at the read boundary so existing clips and callers remain compatible.
+export async function recordingForStorage(recording){const {blob,audio:_audio,...metadata}=recording;return {...metadata,audioBytes:blob?await blob.arrayBuffer():metadata.audioBytes,audioType:blob?.type||metadata.audioType||'audio/wav',enabled:!!recording.enabled&&learningEligible(recording)};}
+export function restoreRecording(recording){const {audioBytes,audioType,...metadata}=recording;return {...metadata,blob:audioBytes?new Blob([audioBytes],{type:audioType||'audio/wav'}):recording.blob};}
+export const listRecordings=async()=>(await transact('readonly',store=>store.getAll())).map(restoreRecording);
+export const putRecording=async recording=>{const stored=await recordingForStorage(recording);return transact('readwrite',store=>store.put(stored));};
 export const removeRecording=id=>transact('readwrite',store=>store.delete(id));
 
 export function trimWav(buffer,start,end,minDuration=.5) {

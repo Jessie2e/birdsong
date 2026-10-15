@@ -120,7 +120,7 @@ export default function SoundAlikes({ onHome, onComplete, sessions, BirdArt }) {
   }
 
   return <main className="screen collection-screen sound-alikes-screen">
-    <button className="back-button" onClick={() => { stop(); onHome(); }}>← Home</button>
+    <button className="back-button" onClick={() => { stop(); onHome(); }}>← Play & Learn</button>
     {stage === 'compare' && <>
       <header className="section-header compare-header">
         <p className="eyebrow">SOUND-ALIKES · FIRST PAIR</p>
@@ -168,7 +168,7 @@ export default function SoundAlikes({ onHome, onComplete, sessions, BirdArt }) {
       {score >= 5 && <p className="comparison-badge">✨ {sessions.some(session => session.mode === 'sound-alikes' && session.pairId === 'cardinal-finch' && session.id !== sessionId && session.score >= 5) ? 'Two Voices badge earned' : 'New badge: Two Voices'}</p>}
       <button className="primary-button" onClick={begin}>Try the pair again <span>↻</span></button>
       <button className="review-button" onClick={compareAgain}>♪ Compare the songs</button>
-      <button className="text-button" onClick={() => { stop(); onHome(); }}>Back Home</button>
+      <button className="text-button" onClick={() => { stop(); onHome(); }}>Back to Play & Learn</button>
     </section>}
     {audioError && <p className="comparison-error" role="alert">{audioError}</p>}
   </main>;

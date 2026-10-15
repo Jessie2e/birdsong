@@ -1,3 +1,4 @@
+import {oracleExcerpt} from './oracle-audio.js';
 // Natural-speed excerpts; a shared Web Audio clock keeps every voice in time.
 export function excerpt(buffer, start, length, context) {
   const offset = Math.max(0, Math.min(start, buffer.duration - .1));
@@ -14,7 +15,7 @@ export function studioUnlocked(saved, history, recognition) {
   return saved || ['robin', 'carolina-wren'].every(id => recognition(history, id));
 }
 export class StudioAudio {
-  constructor(onPulse) { this.context = new AudioContext(); this.cache = new Map(); this.nodes = new Set(); this.onPulse = onPulse; this.events = []; this.generation = 0; }
+  constructor(onPulse) { this.context = new AudioContext(); this.cache = new Map(); this.chirps = new Map(); this.nodes = new Set(); this.onPulse = onPulse; this.events = []; this.generation = 0; }
   async load(bird) {
     const key=`${bird.id}:${bird.audio}`;
     if (!this.cache.has(key)) this.cache.set(key, fetch(bird.audio).then(response => { if (!response.ok) throw Error('Audio unavailable'); return response.arrayBuffer(); }).then(bytes => this.context.decodeAudioData(bytes)).catch(error => { this.cache.delete(key); throw error; }));
@@ -42,6 +43,9 @@ export class StudioAudio {
     this.sound(excerpt(buffer, start, length, this.context), this.context.currentTime + .03, .7, pitch);
     return Math.min(length, buffer.duration - start);
   }
+  async previewChirp(bird,length=.65) {const token=this.generation;await this.context.resume();const buffer=await this.load(bird);if(token!==this.generation)return;const key=`${bird.id}:${bird.audio}:${length}`;if(!this.chirps.has(key)){const section=oracleExcerpt(buffer,length);this.chirps.set(key,excerpt(buffer,section.start,section.duration,this.context));}this.sound(this.chirps.get(key),this.context.currentTime+.03,.7);}
+  async prepareChirps(voices,length=.65){await this.prepare(voices);for(const bird of voices){const key=`${bird.id}:${bird.audio}:${length}`;if(!this.chirps.has(key)){const buffer=await this.load(bird),section=oracleExcerpt(buffer,length);this.chirps.set(key,excerpt(buffer,section.start,section.duration,this.context));}}}
+  womp(){const now=this.context.currentTime;[210,140].forEach((frequency,i)=>{const osc=this.context.createOscillator(),gain=this.context.createGain(),at=now+i*.18;osc.type='triangle';osc.frequency.setValueAtTime(frequency,at);osc.frequency.exponentialRampToValueAtTime(frequency*.6,at+.2);gain.gain.setValueAtTime(.0001,at);gain.gain.exponentialRampToValueAtTime(.14,at+.02);gain.gain.exponentialRampToValueAtTime(.0001,at+.22);osc.connect(gain);gain.connect(this.context.destination);this.nodes.add(osc);osc.onended=()=>{this.nodes.delete(osc);osc.disconnect();gain.disconnect();};osc.start(at);osc.stop(at+.24);});}
   async start(voices, bpm, style, getSettings) {
     const token = this.generation;
     await this.context.resume(); await Promise.all(voices.map(bird => this.load(bird)));
