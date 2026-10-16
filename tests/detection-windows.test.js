@@ -1,0 +1,4 @@
+import {test} from 'node:test';
+import assert from 'node:assert/strict';
+import {detectionWindows} from '../src/detection-windows.js';
+test('timeline colors use only visible birds at the selected confidence cutoff and merge overlapping windows',()=>{const matches=[{scientificName:'Bird One'},{scientificName:'Bird Two'}],segments=[{start:0,end:3,detections:[{scientificName:'Bird One',score:.8},{scientificName:'Bird Two',score:.2}]},{start:1.5,end:4.5,detections:[{scientificName:'Bird One',score:.7}]},{start:6,end:9,detections:[{scientificName:'Bird Two',score:.5},{scientificName:'Hidden Bird',score:.9}]}];assert.deepEqual(detectionWindows(segments,matches,.35),[{scientificName:'Bird One',start:0,end:4.5},{scientificName:'Bird Two',start:6,end:9}]);assert.equal(detectionWindows(segments,matches,.1).length,3);assert.equal(segments[0].end,3);});
