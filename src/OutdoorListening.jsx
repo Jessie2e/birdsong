@@ -1,3 +1,4 @@
+import {microphoneRequest,recorderOptions,inputDetails,recordingLevel} from './microphone-check';
 import { useEffect, useRef, useState } from 'react';
 import RecordingShelf from './RecordingShelf';
 import FlockPlayback from './FlockPlayback';
@@ -23,7 +24,7 @@ export default function OutdoorListening({ onHome, BirdArt, onPractice }) {
   const regionRef = useRef(region), rangeRequest = useRef(0);
   const [rangeScores, setRangeScores] = useState(null), [rangeStatus, setRangeStatus] = useState('idle');
   const [quality, setQuality] = useState(null);
-  const [liveLevel, setLiveLevel] = useState(-100);
+  const [liveLevel, setLiveLevel] = useState(-100),[livePeak,setLivePeak]=useState(-100),[micMode,setMicMode]=useState('natural'),[micDetails,setMicDetails]=useState(null);
   const meterContext = useRef(null), meterTimer = useRef(null);
   const [keeping,setKeeping] = useState(null);
   const [heard, setHeard] = useState(readHeard);
@@ -106,13 +107,14 @@ export default function OutdoorListening({ onHome, BirdArt, onPractice }) {
     } finally { if (decoder?.state !== 'closed') await decoder?.close(); context.current = null; }
   }
   async function startRecording() {
-    setKeeping(null); audio.current?.pause(); setMatches(null); setSegments([]); setMessage('Allow microphone access to record up to 45 seconds.');
+    setKeeping(null);setMicDetails(null);setQuality(null); audio.current?.pause(); setMatches(null); setSegments([]); setMessage('Allow microphone access to record up to 45 seconds.');
     setStatus('requesting');
     try {
       if (!navigator.mediaDevices?.getUserMedia || !window.MediaRecorder) throw new Error('unsupported');
-      const input = await navigator.mediaDevices.getUserMedia({audio:{channelCount:1, echoCancellation:false, noiseSuppression:false, autoGainControl:false}});
+      const input = await navigator.mediaDevices.getUserMedia(microphoneRequest(micMode));
       if (!mounted.current) { input.getTracks().forEach(track => track.stop()); return; }
       stream.current = input;
+      setMicDetails({...inputDetails(input.getAudioTracks()[0]),mode:micMode});
       // Optional input meter. A meter failure must not prevent recording.
       try {
         const meter = new AudioContext(); meterContext.current = meter;
@@ -120,15 +122,16 @@ export default function OutdoorListening({ onHome, BirdArt, onPractice }) {
         const analyser = meter.createAnalyser(); analyser.fftSize = 1024;
         meter.createMediaStreamSource(input).connect(analyser);
         const samples = new Float32Array(analyser.fftSize);
-        setLiveLevel(-100);
+        setLiveLevel(-100);setLivePeak(-100);
         meterTimer.current = setInterval(() => {
           analyser.getFloatTimeDomainData(samples);
-          setLiveLevel(signalQuality(samples).db);
+          const quality=signalQuality(samples,meter.sampleRate);setLiveLevel(quality.db);setLivePeak(old=>Math.max(old,quality.peakDb));
         }, 120);
       } catch { meterContext.current?.close(); meterContext.current = null; }
       if (!mounted.current) { releaseMic(); return; }
       const chunks = [];
-      const capture = new MediaRecorder(input); recorder.current = capture;
+      let capture;try{capture=new MediaRecorder(input,recorderOptions(MediaRecorder));}catch{capture=new MediaRecorder(input);}recorder.current = capture;
+      setMicDetails(details=>({...details,format:capture.mimeType,bitrate:capture.audioBitsPerSecond||null}));
       capture.ondataavailable = event => { if (event.data.size) chunks.push(event.data); };
       capture.onerror = () => { releaseMic(); setStatus('ready'); setMessage('Recording stopped unexpectedly. Please try again.'); };
       capture.onstop = () => {
@@ -147,7 +150,7 @@ export default function OutdoorListening({ onHome, BirdArt, onPractice }) {
   function discard() {
     analysisVersion.current++;
     audio.current?.pause(); blobRef.current = null;
-    setKeeping(null); setClip(null); setWaveform([]); setDuration(0); setQuality(null); setMatches(null); setSegments([]);
+    setKeeping(null);setMicDetails(null); setClip(null); setWaveform([]); setDuration(0); setQuality(null); setMatches(null); setSegments([]);
     setMessage('Recording discarded. Ready for another voice.');
   }
   function confirm(match) {
@@ -159,7 +162,7 @@ export default function OutdoorListening({ onHome, BirdArt, onPractice }) {
   const resultMessage = region !== 'world' && rangeStatus !== 'ready' ? 'Waiting for the regional filter before showing suggestions.' : matches !== null ? visibleMatches.length
     ? `Possible voices in your recording. ${visibleMatches.some(match => match.score < DETECTION_THRESHOLD) ? 'Tentative suggestions need a careful listen; they are not confirmed IDs.' : 'Listen and compare before confirming.'}`
     : matches.length ? sensitivity === DETECTION_THRESHOLD ? 'No regional match at the standard cutoff. Try Faint calls to inspect tentative suggestions.' : 'No plausible regional match at this cutoff. A clearer recording may help.'
-    : 'No clear match at either cutoff. Bird calls may be too faint or masked by background noise.' : '';
+    : 'The model didn’t find a match at either cutoff. This does not prove that the birds or microphone were too quiet. Replay the clip: if the calls are clear, this may be an identification limitation.' : '';
   const busy = ['loading','analyzing','requesting','recording'].includes(status);
   return <main className={`screen outdoor-screen ${visibleMatches?.length ? "has-flock" : ""}`}>
     <button className="back-button" onClick={onHome}>← Explore</button>
@@ -171,16 +174,16 @@ export default function OutdoorListening({ onHome, BirdArt, onPractice }) {
       <div aria-label="Outdoor recording">
       <span className="listening-symbol" aria-hidden="true">♪</span>
       <h2>{status === 'recording' ? `Listening · ${seconds}s / 45s` : '1 · Record birdsong'}</h2>
-      <p>Audio stays on this device. Recording starts only when you tap Record.</p>
+      <p>Audio stays on this device. Recording starts only when you tap Record.</p><label className="mic-mode">Microphone level mode<select aria-label="Microphone level mode" value={micMode} disabled={busy} onChange={event=>setMicMode(event.target.value)}><option value="natural">Natural · no automatic level boost</option><option value="automatic">Automatic level · compare if playback is quiet</option></select></label><p className="world-small-note">Start with a 5–10 second recording, then replay it. If the recording sounds much quieter than the birds, try Automatic level on your next recording. Browser support varies.</p>
       <p role="status" aria-live="polite">{clip && matches !== null ? '' : message || 'Load your listening kit once, then record a 3–45 second call.'}</p>
-      {status === 'recording' && <div className="recording-level"><label htmlFor="live-recording-level">Microphone level · {liveLevel < -50 ? 'Quiet' : liveLevel > -12 ? 'Very loud' : 'Receiving sound'}</label><meter id="live-recording-level" min="-80" max="0" low="-50" high="-12" optimum="-28" value={Math.max(-80,liveLevel)} /><small>Quiet calls may need a closer recording. This measures sound level, not whether a bird is singing.</small></div>}
+      {status === 'recording' && <div className="recording-level"><label htmlFor="live-recording-level">Microphone level · {liveLevel < -50 ? 'Low recorded level' : liveLevel > -12 ? 'Very loud' : 'Receiving sound'}</label><meter id="live-recording-level" min="-80" max="0" low="-50" high="-12" optimum="-28" value={Math.max(-80,liveLevel)} /><small>Strongest sound this recording: {Math.round(livePeak)} dBFS. This is recorded volume, not a bird detector or a judgment of how loud the birds are outside.</small></div>}
       {!modelReady ? <button className="primary-button" disabled={status === 'loading'} onClick={load}>{status === 'loading' ? 'Loading…' : 'Load listening kit'} <span>↓</span></button> : <>
         <button className="primary-button" disabled={busy && status !== 'recording'} onClick={status === 'recording' ? () => recorder.current?.stop() : startRecording}>{status === 'recording' ? 'Stop recording' : 'Record birdsong'} <span>{status === 'recording' ? '■' : '●'}</span></button>
         <label className="listening-upload">Or choose a 3–45 second audio clip<input type="file" accept="audio/*" disabled={busy} onChange={event => {
           const file = event.target.files[0]; event.target.value = '';
           if (!file) return;
           if (file.size > 20 * 1024 * 1024) { setMessage('Choose a clip smaller than 20 MB.'); return; }
-          setKeeping(null); audio.current?.pause(); setWaveform([]); setDuration(0); setQuality(null); setMatches(null); setSegments([]); blobRef.current = file; setClip(URL.createObjectURL(file)); setMessage('Recording ready. Next, tap Find birds.');
+          setKeeping(null);setMicDetails(null); audio.current?.pause(); setWaveform([]); setDuration(0); setQuality(null); setMatches(null); setSegments([]); blobRef.current = file; setClip(URL.createObjectURL(file)); setMessage('Recording ready. Next, tap Find birds.');
         }} /></label>
       </>}
       {modelReady && <button className="listening-cancel" disabled={busy} onClick={load}>Reload listening kit</button>}
@@ -190,11 +193,13 @@ export default function OutdoorListening({ onHome, BirdArt, onPractice }) {
     {clip && <>
       <section className="listening-next" aria-label="Find birds in your recording"><h2>2 · Find birds</h2><p>{matches !== null ? 'Your suggestions are ready. Play below to watch your flock.' : 'Identify possible voices before playing your dancing flock.'}</p><button className="flock-analyze" disabled={busy || !modelReady} onClick={() => analyze(blobRef.current)}>{status === 'analyzing' ? 'Finding birds…' : matches !== null ? 'Find birds again' : 'Find birds →'}</button>{status === 'analyzing' && <p role="status">{message}</p>}</section>
       {matches !== null && <div className="recording-result"><p role="status">{resultMessage}</p><label className="recording-sensitivity">Detection sensitivity<select aria-label="Detection sensitivity" value={sensitivity} onChange={event => {audio.current?.pause(); setSensitivity(Number(event.target.value));}}><option value={DETECTION_THRESHOLD}>Standard · 35% cutoff</option><option value={FAINT_THRESHOLD}>Faint calls · 10% cutoff</option></select></label><small>Lowering the cutoff can reveal weak calls and incorrect guesses. Scores are model confidence, not identification certainty.</small></div>}
-      {quality && <p className="recording-quality">Recording level: <strong>{quality.clipped ? 'Clipping' : quality.quiet ? 'Quiet' : 'Receiving sound'}</strong> · {Math.round(quality.db)} dBFS average. {quality.clipped ? 'Try recording farther from loud sound.' : quality.quiet ? 'Quiet overall; try moving closer to the birds or away from background noise.' : 'A healthy level does not guarantee a clear bird call.'} The waveform is scaled for visibility.</p>}
+      {quality && <div className="recording-quality"><p>Recording check: <strong>{recordingLevel(quality)}</strong> · strongest moment {Math.round(quality.strongestDb)} dBFS · peak {Math.round(quality.peakDb)} dBFS · average {Math.round(quality.db)} dBFS.</p><p>{quality.clipped?'Some recorded sound is distorted; compare another recording.':quality.quiet?'The average level is low. Quiet stretches can lower the average even when calls are clear. Listen to playback before changing your recording setup.':'Recorded level alone cannot tell us whether bird calls are identifiable.'} These readings never block identification.</p></div>}
+
       <FlockPlayback key={clip} clip={clip} waveform={waveform} duration={duration} matches={visibleMatches} segments={segments} audioRef={audio} BirdArt={BirdArt} heard={heard} onConfirm={confirm} onPractice={onPractice} analyzing={status === 'analyzing'} onKeep={match=>{audio.current?.pause();setKeeping({match,blob:blobRef.current});}} />
       
       <div className="recording-retention"><small>Unsaved recording · discarded when you leave. Only trimmed calls you explicitly save are kept on this device.</small><button disabled={busy} onClick={discard}>Discard recording</button></div>
     </>}
+    {micDetails&&<details className="mic-details"><summary>Microphone check · {micDetails.name}</summary><p>Requested mode: {micDetails.mode==='automatic'?'Automatic level':'Natural'}. Safari/browser reports:</p><ul><li>Automatic level: {micDetails.automaticLevel===undefined?'not reported':micDetails.automaticLevel?'on':'off'}</li><li>Noise suppression: {micDetails.noiseSuppression===undefined?'not reported':micDetails.noiseSuppression?'on':'off'}</li><li>Echo cancellation: {micDetails.echoCancellation===undefined?'not reported':micDetails.echoCancellation?'on':'off'}</li><li>Sample rate: {micDetails.sampleRate?`${micDetails.sampleRate} Hz`:'not reported'} · channels: {micDetails.channels||'not reported'}</li><li>Recording format: {micDetails.format||'browser default'}{micDetails.bitrate?` · ${Math.round(micDetails.bitrate/1000)} kbps`:''}</li></ul><p>These details stay on this page. If the microphone name is a headset, disconnect it and make a new recording with the phone.</p></details>}
     <RecordingShelf blob={keeping?.blob} match={keeping?.match} onClose={()=>setKeeping(null)} />
     <section className="heard-list"><h2>Your heard list · {heard.length}</h2><p>Your confirmed outdoor discoveries. Your game flock still grows through 80% flights.</p>{heard.length > 0 && <ul>{heard.map(item => <li key={item.scientificName}>{item.name}</li>)}</ul>}</section>
     <p className="listening-credit">Powered by <a href="https://birdnet.cornell.edu/" target="_blank" rel="noreferrer">BirdNET</a>, Cornell Lab of Ornithology and Chemnitz University of Technology. Model: <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank" rel="noreferrer">CC BY-NC-SA 4.0</a>. Noncommercial educational beta · independent of BirdNET. <a href="/birdnet/ATTRIBUTION.txt" target="_blank" rel="noreferrer">Model credits</a> · <a href="/birdnet/LICENSE.txt" target="_blank" rel="noreferrer">Full model license</a>.</p>

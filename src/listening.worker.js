@@ -1,7 +1,7 @@
 import * as tf from '@tensorflow/tfjs';
 
 import { realSpectrum } from './listening-spectrum';
-import { FAINT_THRESHOLD, WINDOW_SECONDS, HOP_SECONDS, summarizeSegments, validRecordingDuration } from './listening-timeline';
+import { FAINT_THRESHOLD, WINDOW_SECONDS, HOP_SECONDS, summarizeSegments, validRecordingDuration, hasRecordedSignal } from './listening-timeline';
 
 class MelSpecLayerSimple extends tf.layers.Layer {
   constructor(config) { super(config); this.config = config; this.filters = tf.tensor2d(config.melFilterbank); }
@@ -62,9 +62,7 @@ self.onmessage = async ({ data }) => {
       const segments = [];
       const pcm = data.pcm;
       if (!pcm?.length || !validRecordingDuration(pcm.length / 48000)) throw new Error('Invalid recording length.');
-      let energy = 0;
-      for (const sample of pcm) energy += sample * sample;
-      if (Math.sqrt(energy / pcm.length) < 0.0001) { self.postMessage({type:'results', matches:[], segments:[]}); return; }
+      if (!hasRecordedSignal(pcm)) { self.postMessage({type:'results', matches:[], segments:[]}); return; }
       const windowSamples = WINDOW_SECONDS * 48000;
       const hopSamples = HOP_SECONDS * 48000;
       const starts = [];

@@ -41,10 +41,14 @@ export function validRecordingDuration(seconds) {
 }
 
 // Keep absolute input levels separate from the normalized display waveform.
-export function signalQuality(pcm) {
-  if (!pcm.length) return {rms:0, peak:0, db:-100, quiet:true, clipped:false};
-  let energy = 0, peak = 0, clipped = 0;
-  for (const value of pcm) {energy += value * value; peak = Math.max(peak,Math.abs(value)); if (Math.abs(value) >= .99) clipped++;}
+export function signalQuality(pcm, sampleRate=48000) {
+  if (!pcm.length) return {rms:0, peak:0, db:-100, quiet:true, clipped:false,peakDb:-100,strongestDb:-100};
+  let energy = 0, peak = 0, clipped = 0,windowEnergy=0,strongest=0;
+  const windowSize=Math.max(1,Math.min(pcm.length,Math.round(sampleRate*.1)));
+  for (let i=0;i<pcm.length;i++) {const value=pcm[i];energy+=value*value;windowEnergy+=value*value;if(i>=windowSize)windowEnergy-=pcm[i-windowSize]*pcm[i-windowSize];if(i>=windowSize-1)strongest=Math.max(strongest,windowEnergy/windowSize);peak=Math.max(peak,Math.abs(value));if(Math.abs(value)>=.99)clipped++;}
   const rms = Math.sqrt(energy / pcm.length);
-  return {rms, peak, db:Math.max(-100,20 * Math.log10(rms || 1e-5)), quiet:rms < .003, clipped:clipped / pcm.length > .01};
+  return {rms, peak, db:Math.max(-100,20 * Math.log10(rms || 1e-5)), peakDb:Math.max(-100,20*Math.log10(peak||1e-5)),strongestDb:Math.max(-100,10*Math.log10(strongest||1e-10)),quiet:rms < .003, clipped:clipped / pcm.length > .01};
 }
+
+// The model normalizes each window. Do not reject real audio by absolute volume.
+export function hasRecordedSignal(pcm){return pcm.some(value=>Number.isFinite(value)&&value!==0);}
