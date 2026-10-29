@@ -85,7 +85,7 @@ Eight additional credited learning excerpts are hosted in `public/audio/learning
 
 ## Shared DJ chirps and local authoring
 
-Approved cuts in `src/data/dj-chirps.json` and `public/audio/chirps` are included in production. New DJ arrangements default to the most recently approved chirp for each preset bird. The sound list offers every approved cut first, followed by original songs and personal phrases. Existing saved arrangements retain stable source IDs and their original sounds; chirp colors follow the underlying bird.
+Approved cuts in `src/data/dj-chirps.json` and `public/audio/chirps` are included in production. New DJ arrangements start at 120 BPM with Woodland tap and four active chirps: Mourning Dove, Blue Jay, American Robin and Carolina Wren on beats 1, 3, 5 and 7. Each preset bird uses its most recently approved chirp. Change bird / edit sound & timing opens the source and timing controls. The sound list offers every approved cut first, followed by original songs and personal phrases. Existing saved arrangements retain stable source IDs and their original sounds; chirp colors follow the underlying bird.
 
 Run the local Vite server and open `/?workbench=audio` to edit the shared library. Choose/reopen a source, trim and preview, then explicitly approve and choose Add to DJ library. Drafts are private project-local files in ignored `.birdsong-library`; approving writes a credited, checksummed WAV into the production library. Editing an approved sound makes a copy. The authoring UI and save API are development-only; they are not published. Committing and deploying approved assets makes them available on the live site.
 

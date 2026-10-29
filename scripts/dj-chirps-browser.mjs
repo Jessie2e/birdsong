@@ -16,8 +16,15 @@ try{
   const page=await context.newPage(),errors=[];page.on('pageerror',e=>errors.push(e.message));
   async function dj(){await page.goto(base);await page.getByRole('button',{name:/Make Music/}).first().click();await page.getByRole('navigation',{name:'Music sections'}).getByRole('button',{name:'DJ station',exact:true}).click();}
   await dj();
-  for(const [index,id]of ['cardinal','bluejay','robin','carolina-wren'].entries())assert.equal(await page.getByLabel(`Sound source for lane ${index+1}`,{exact:true}).inputValue(),'chirp:'+expected[id].id);
-  const lane=page.locator('.studio-voice').first();await lane.locator('summary').click();const source=page.getByLabel('Sound source for lane 1',{exact:true});
+  for(const [index,id]of ['mourning-dove','bluejay','robin','carolina-wren'].entries())assert.equal(await page.getByLabel(`Sound source for lane ${index+1}`,{exact:true}).inputValue(),'chirp:'+expected[id].id);
+  assert.equal(await page.locator('.studio-transport select').nth(0).inputValue(),'120');
+  assert.equal(await page.locator('.studio-transport select').nth(1).inputValue(),'woodland');
+  assert.equal(await page.locator('.studio-switch[aria-pressed="true"]').count(),4);
+  assert.deepEqual(await page.locator('.dj-beats .beat-entries').evaluateAll(rows=>rows.map((row,i)=>row.children.length?i+1:null).filter(Boolean)),[1,3,5,7]);
+  assert.equal(await page.getByText('Change bird / edit sound & timing',{exact:true}).count(),4);
+  assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),true);
+  await page.screenshot({path:`${out}/defaults-${viewport.width}.png`,fullPage:true});
+  const lane=page.locator('.studio-voice').first();await lane.locator('summary').focus();await page.keyboard.press('Enter');assert.equal(await lane.locator('details').getAttribute('open'),'');const source=page.getByLabel('Sound source for lane 1',{exact:true});
   for(const clip of chirps){await source.selectOption('chirp:'+clip.id);const before=await page.evaluate(()=>qa.sounds.length);await page.getByRole('button',{name:/Preview lane 1:/}).click();await page.waitForFunction(n=>qa.sounds.length>n,before);const sound=await page.evaluate(()=>qa.sounds.at(-1));assert.ok(Math.abs(sound.duration-clip.duration)<.002);assert.ok(sound.peak>.00001);assert.equal(sound.gain,1);await page.waitForFunction(()=>document.querySelector('.dj-audition').getAttribute('aria-pressed')==='false');}
   // A new source loads its own audio; longer originals remain available.
   await source.selectOption('cardinal');await page.getByRole('button',{name:/Preview lane 1:/}).click();await page.waitForFunction(()=>qa.sounds.at(-1).duration>2);await page.getByRole('button',{name:/Preview lane 1:/}).click();await page.waitForFunction(()=>qa.active===0);
@@ -31,10 +38,10 @@ try{
   await page.screenshot({path:`${out}/dj-${viewport.width}.png`,fullPage:true});
   // Existing recipes retain original source IDs after deployment.
   await page.evaluate(()=>{const mixes=JSON.parse(localStorage.getItem('birdsong-studio-mixes-v1'));mixes.push({name:'Legacy original',tempo:100,beat:'none',tracks:{'lane-0':{birdId:'cardinal',step:0,pitch:0,start:.2,length:2.5,volume:.55,enabled:true}}});localStorage.setItem('birdsong-studio-mixes-v1',JSON.stringify(mixes));});
-  await dj();await page.locator('.studio-save select').selectOption('Legacy original');assert.equal(await source.inputValue(),'cardinal');
+  await dj();await page.locator('.studio-save select').selectOption('Legacy original');assert.equal(await source.inputValue(),'cardinal');assert.equal(await page.locator('.studio-transport select').nth(0).inputValue(),'100');assert.equal(await page.locator('.studio-transport select').nth(1).inputValue(),'none');
   // Uncached failure offers retry and recovers without changing the saved recipe.
   await page.reload();await page.evaluate(()=>{qa.fail=true;});await page.getByRole('button',{name:/Make Music/}).first().click();await page.getByRole('navigation',{name:'Music sections'}).getByRole('button',{name:'DJ station',exact:true}).click();await page.getByRole('button',{name:/Preview lane 1:/}).click();await page.getByRole('alert').filter({hasText:'This lane couldn’t preview.'}).waitFor();await page.evaluate(()=>{qa.fail=false;});await page.getByRole('button',{name:/Preview lane 1:/}).click();await page.waitForFunction(()=>qa.sounds.length>0);
-  assert.deepEqual(errors,[]);pass(`${viewport.width}×${viewport.height}: all ${chirps.length} chirps decode and play with correct durations and nonzero audio; four default lanes use latest approved cuts; originals playable; loop/beat/stop; source loading failure/retry; saved chirp and legacy mixes; no overflow/runtime errors.`);await context.close();
+  assert.deepEqual(errors,[]);pass(`${viewport.width}×${viewport.height}: all ${chirps.length} chirps decode and play with correct durations and nonzero audio; screenshot defaults: Dove/Jay/Robin/Wren active on beats 1/3/5/7, 120 BPM and Woodland tap; keyboard Change bird disclosure; originals playable; loop/beat/stop; source loading failure/retry; saved chirp and legacy mixes; no overflow/runtime errors.`);await context.close();
  }
  await fs.writeFile(out+'/results.txt',report.join('\n')+'\n');
 }finally{await browser.close();}
