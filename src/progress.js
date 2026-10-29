@@ -54,3 +54,11 @@ export function badgeProgress(history, sessions, spotted) {
     { id: 'wild', icon: '⌖', name: 'Out in the Wild', description: 'Mark your first personal bird sighting.', value: sessions.some(s => s.mode === "sighting") ? 1 : spotted.length, target: 1 },
   ];
 }
+
+// Shuffle the full eligible pool before taking the six challenge targets.
+// Small pools cycle evenly; eligibility and mastery remain the caller’s responsibility.
+export function planAdvancedTargets(pool) {
+  if (!pool.length) return [];
+  const eligible = shuffle(pool);
+  return shuffle(Array.from({ length: 6 }, (_, i) => eligible[i % eligible.length]));
+}

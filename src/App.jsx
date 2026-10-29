@@ -1,3 +1,7 @@
+import { djChirps } from "./dj-library";
+import { lazy, Suspense } from "react";
+import { songProgress, unlockedSongRecordings } from "./song-progress";
+const LibraryWorkbench = import.meta.env.DEV ? lazy(() => import("./LibraryWorkbench")) : null;
 import AdvancedListening from './AdvancedListening';
 import { useEffect, useRef, useState } from "react";
 import { birds } from "./data/birds";
@@ -10,6 +14,7 @@ import { shuffle, planFlight, recognition, recentStats, badgeProgress } from "./
 import { audioCredits } from "./audio-credits";
 import useRecordings from "./useRecordings";
 import { personalRounds } from "./personal-recordings";
+import { variedReferenceRounds, referenceRecordings } from "./flight-recordings";
 import RecordingShelf from "./RecordingShelf";
 import BirdHub from "./BirdHub";
 import ExploreWorld from "./ExploreWorld";
@@ -27,7 +32,7 @@ function getFlightRating(score) {
   if (score === 10) return "🪶🪶🪶 Perfect flight";
   if (score >= 8) return "🪶🪶 Sharp ears";
   if (score >= 5) return "🪶 Getting the hang of it";
-  return "🌱 Learning";
+  return "🌱 Finding your wings";
 }
 
 function readStoredJSON(key, fallback) {
@@ -128,7 +133,7 @@ function BirdIllustration({ bird, small = false }) {
 }
 
 function LearnScreen({onHome,onPlay,onPractice,onBadges,onSoundAlikes,onStudio,onAdvanced,discoveredBirds,history,sessions,spottedBirds}) {
- return <main className="world-screen screen"><button className="back-button" onClick={onHome}>← Birdsong</button><header className="world-header"><p className="eyebrow">A LITTLE CHALLENGE. A GROWING EAR.</p><h1>Play & Learn.</h1><p>Get to know the voices around you, one little flight at a time.</p></header><section className="flight-start-card"><p className="eyebrow">YOUR NEXT FLIGHT</p><h2>Ten calls. How many do you know?</h2><p>A flight is a short listening quiz: play a bird call, then choose its name. There’s no timer. Score <strong>8 out of 10</strong> to welcome the next bird into your Flock.</p><button className="primary-button" onClick={onPlay}>Start a 10-question flight <span>→</span></button><small>Welcomed birds are yours to enjoy in Studio and Your Nest. You can also welcome birds through music, field notes and companion visits.</small></section><details className="learning-explainer"><summary>What does “voice recognized” mean?</summary><p>It means you’re getting familiar with a bird by ear: at least four correct answers in a group of five attempts, spread over two or more flights. It adds a recognition mark to that bird’s Flock card, helps you track what you know, and gives developing voices more priority in future flights. Your learning badges celebrate these milestones too. Recognize two birds to open A sharper ear, with short phrases and two-voice challenges toward Mastered by ear.</p><p>Welcoming a bird adds it to your Flock. Recognizing its voice records what you’ve learned about it.</p></details><NextAdventure birds={birds} history={history} sessions={sessions} discoveredBirds={discoveredBirds} onPlay={onPlay} onStudio={onStudio} onSoundAlikes={onSoundAlikes}/><div className="world-actions"><button onClick={onPractice}><strong>Practice calls</strong><span>Listen freely to the birds in your Flock</span></button><button onClick={onSoundAlikes}><strong>Sound-alikes</strong><span>Learn what makes two voices different</span></button></div><section className="world-panel"><h2>A sharper ear</h2><p>Recognize two voices to open short-phrase and two-voice challenges. Learn both to earn Mastered by ear, and earn extra Bird Bestie species changes along the way.</p><button onClick={onAdvanced}>Explore advanced listening →</button></section><ProgressSummary history={history} sessions={sessions} spottedBirds={spottedBirds} onBadges={onBadges}/></main>;
+ return <main className="world-screen screen"><button className="back-button" onClick={onHome}>← Birdsong</button><header className="world-header"><p className="eyebrow">A LITTLE CHALLENGE. A GROWING EAR.</p><div className="learn-title-row"><h1>Play & Learn.</h1><div className="learn-header-bird bird-facing-left" aria-hidden="true"><BirdIllustration bird={birds.find(b => b.id === "bluejay")} /></div></div><p>Get to know the voices around you, one little flight at a time.</p></header><section className="flight-start-card"><p className="eyebrow">YOUR NEXT FLIGHT</p><h2>Ten calls. How many do you know?</h2><p>A flight is a short listening quiz: play a bird call, then choose its name. There’s no timer. Score <strong>8 out of 10</strong> to welcome the next bird into your Flock.</p><button className="primary-button" onClick={onPlay}>Start a 10-question flight <span>→</span></button><small>Welcomed birds are yours to enjoy in Studio and Your Nest. You can also welcome birds through music, field notes and companion visits.</small></section><details className="learning-explainer"><summary>What does “voice recognized” mean?</summary><p>It means you’re getting familiar with a bird by ear: at least four correct answers in a group of five attempts, spread over two or more flights. It adds a recognition mark to that bird’s Flock card, helps you track what you know, and gives developing voices more priority in future flights. Your learning badges celebrate these milestones too. Recognize two birds to open A sharper ear, with short phrases and two-voice challenges toward Mastered by ear.</p><p>Six consecutive correct answers on a bird’s familiar recording, across at least three completed regular flights, unlock an additional song for future flights. Preview these songs anytime in Practice; earned songs stay yours after later misses.</p><p>Welcoming a bird adds it to your Flock. Recognizing its voice records what you’ve learned about it.</p></details><NextAdventure birds={birds} history={history} sessions={sessions} discoveredBirds={discoveredBirds} onPlay={onPlay} onStudio={onStudio} onSoundAlikes={onSoundAlikes}/><div className="world-actions"><button onClick={onPractice}><strong>Practice calls</strong><span>Listen freely to the birds in your Flock</span></button><button onClick={onSoundAlikes}><strong>Sound-alikes</strong><span>Learn what makes two voices different</span></button></div><section className="world-panel"><h2>A sharper ear</h2><p>Recognize two voices to open short-phrase and two-voice challenges. Learn both to earn Mastered by ear, and earn extra Bird Bestie species changes along the way.</p><button onClick={onAdvanced}>Explore advanced listening →</button></section><ProgressSummary history={history} sessions={sessions} spottedBirds={spottedBirds} onBadges={onBadges}/></main>;
 }
 
 function GameScreen({
@@ -138,10 +143,10 @@ function GameScreen({
   unlockBird = null,
   birdPool = birds,
   modeLabel = null,
-  history = [], sessions = [], spottedBirds = [], onComplete, onPracticeMissed, personalClips = [], focusBirdId = null,
+  history = [], sessions = [], spottedBirds = [], onComplete, onPracticeMissed, onVisitBird, onRegularFlight, personalClips = [], focusBirdId = null,
 }) {
   const [rounds, setRounds] = useState(() =>
-    modeLabel ? createRounds(10, birdPool, birdPool) : personalRounds(planFlight(birdPool, history,10,focusBirdId),personalClips)
+    modeLabel ? createRounds(10, birdPool, birdPool) : variedReferenceRounds(personalRounds(planFlight(birdPool, history,10,focusBirdId),personalClips), history, unlockedSongRecordings(history, sessions))
   );
 
   const [sessionId, setSessionId] = useState(() => crypto.randomUUID());
@@ -163,6 +168,12 @@ function GameScreen({
     useState(null);
 
   const audioRef = useRef(null);
+  const completedRef = useRef(false);
+  const feedbackRef = useRef(null);
+  const lastRequestedBird = useRef(null);
+  const [activeAudio, setActiveAudio] = useState(null);
+  const headingRef = useRef(null);
+  const [audioError, setAudioError] = useState("");
 
   const [isPlaying, setIsPlaying] =
     useState(false);
@@ -177,84 +188,51 @@ function GameScreen({
     }
 
     setIsPlaying(false);
+    setActiveAudio(null);
   }
 
-  function toggleBirdSound() {
-    /*
-      If a bird is already playing,
-      the same button stops it.
-    */
+  function playSound(bird) {
     if (audioRef.current) {
+      const same = activeAudio === bird?.audio;
       stopCurrentAudio();
+      if (same) return;
+    }
+    lastRequestedBird.current = bird;
+    setAudioError("");
+    if (!bird?.audio) {
+      setAudioError("This bird call couldn’t play. Try again in a moment.");
       return;
     }
-
-    if (!currentRound.correct.audio) return;
-
-    const audio = new Audio(
-      currentRound.correct.audio
-    );
-
+    const audio = new Audio(bird.audio);
     audio.volume = 0.85;
-
     audioRef.current = audio;
+    setActiveAudio(bird.audio);
     setIsPlaying(true);
-
+    const fail = () => {
+      if (audioRef.current !== audio) return;
+      stopCurrentAudio();
+      setAudioError("This bird call couldn’t play. Check your connection, then try again.");
+    };
     audio.onended = () => {
+      if (audioRef.current !== audio) return;
       audioRef.current = null;
       setIsPlaying(false);
     };
-
-    audio.onerror = () => {
-      audioRef.current = null;
-      setIsPlaying(false);
-    };
-
-    audio.play().catch((error) => {
-      console.error(
-        "Could not play bird audio:",
-        error
-      );
-
-      audioRef.current = null;
-      setIsPlaying(false);
-    });
+    audio.onerror = fail;
+    audio.play().catch(fail);
   }
-function toggleUnlockedBirdSound() {
-  if (!newlyUnlocked?.audio) return;
+  function toggleBirdSound() { playSound(currentRound.correct); }
+  function toggleUnlockedBirdSound() { playSound(newlyUnlocked); }
 
-  if (audioRef.current) {
-    stopCurrentAudio();
-    return;
-  }
+  useEffect(() => {
+    if (selectedBird && !finished) feedbackRef.current?.focus({ preventScroll: true });
+    if (selectedBird && !finished) feedbackRef.current?.scrollIntoView({ block: "nearest" });
+  }, [selectedBird, finished]);
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: "instant" });
+    headingRef.current?.focus({ preventScroll: true });
+  }, [finished, roundIndex]);
 
-  const audio = new Audio(newlyUnlocked.audio);
-
-  audio.volume = 0.85;
-
-  audioRef.current = audio;
-  setIsPlaying(true);
-
-  audio.onended = () => {
-    audioRef.current = null;
-    setIsPlaying(false);
-  };
-
-  audio.onerror = () => {
-    audioRef.current = null;
-    setIsPlaying(false);
-  };
-
-  audio.play().catch((error) => {
-    console.error(
-      "Could not play unlocked bird audio:",
-      error
-    );
-
-    audioRef.current = null;
-    setIsPlaying(false);
-  });
-}
   /*
     Stop the previous bird automatically
     whenever the round changes.
@@ -302,12 +280,15 @@ function toggleUnlockedBirdSound() {
   }
 
   function nextRound() {
+    if (!selectedBird || completedRef.current) return;
     stopCurrentAudio();
+    setAudioError("");
 
     if (
       roundIndex ===
       rounds.length - 1
     ) {
+      completedRef.current = true;
       if (unlockBird && onUnlockBird && earnsBird(score, rounds.length)) {
         setNewlyUnlocked(unlockBird);
         onUnlockBird(unlockBird.id);
@@ -328,10 +309,12 @@ function toggleUnlockedBirdSound() {
   function restart() {
     stopCurrentAudio();
 
+    completedRef.current = false;
+    setAudioError("");
     setSessionId(crypto.randomUUID());
     setStartedHistory(history);
     setAnswers([]);
-    setRounds(modeLabel ? createRounds(10, birdPool, birdPool) : personalRounds(planFlight(birdPool, history,10,focusBirdId),personalClips));
+    setRounds(modeLabel ? createRounds(10, birdPool, birdPool) : variedReferenceRounds(personalRounds(planFlight(birdPool, history,10),personalClips), history, unlockedSongRecordings(history, sessions)));
     setRoundIndex(0);
     setSelectedBird(null);
     setScore(0);
@@ -345,6 +328,8 @@ function toggleUnlockedBirdSound() {
   }
 
   const newlyRecognized = birdPool.filter(b => recognition(history, b.id) && !recognition(startedHistory, b.id));
+  const earlierSongIds = new Set(unlockedSongRecordings(startedHistory, sessions.filter(s => s.id !== sessionId)).map(r => r.id));
+  const newlyUnlockedSongs = unlockedSongRecordings(history, sessions).filter(r => !earlierSongIds.has(r.id));
   const missed = [...new Set(answers.filter(a => !a.correct).map(a => a.birdId))];
   const beforeBadges = badgeProgress(startedHistory, sessions.filter(s => s.id !== sessionId), spottedBirds);
   const earnedBadges = badgeProgress(history, sessions, spottedBirds).filter(b => b.value >= b.target && beforeBadges.find(previous => previous.id === b.id)?.value < b.target);
@@ -358,82 +343,54 @@ function toggleUnlockedBirdSound() {
           ← {modeLabel?"Birds nearby":"Play & Learn"}
         </button>
 
-        <div className="results-card">
-          <p className="eyebrow">
-            FLIGHT COMPLETE
-          </p>
-
-          <div className="results-bird">
-            <BirdIllustration bird={birds[0]} />
-          </div>
-
-          <h2>{score}/10</h2>
-
-          <p className="flight-rating">
-            {getFlightRating(score)}
-          </p>
-
-          <p>
-            {score >= 8
-              ? "Well hello, birder."
-              : score >= 5
-              ? "You're getting the hang of this."
-              : "Every birder starts somewhere."}
-          </p>
+        <div className={`results-card ${score === 10 ? 'perfect-flight' : score >= 8 ? 'high-flight' : 'growing-flight'}`}>
+          <header className="flight-celebration">
+            <p className="eyebrow">FLIGHT COMPLETE · TEN LITTLE LISTENS</p>
+            <p className="flight-rating">{getFlightRating(score)}</p>
+            <h1 ref={headingRef} tabIndex={-1}>{score}<span>/10</span><small>birds identified</small></h1>
+            <h2>{score === 10 ? "You made every call count!" : score >= 8 ? "That’s a flight to celebrate!" : score >= 5 ? "Your ears are finding their wings." : "A little more familiar, one call at a time."}</h2>
+            <p>{score === 10 ? "Ten calls, ten right answers. Take a little bow." : score >= 8 ? "Look at you, getting to know the birds around you." : "The calls you met today will be waiting for another listen."}</p>
+          </header>
 
           {newlyUnlocked && (
-            <section className="unlock-card" aria-live="polite">
-              <p className="eyebrow">NEW BIRD!</p>
-
-              <div className="unlock-bird-art">
-                <BirdIllustration bird={newlyUnlocked} small />
-              </div>
-
+            <section className="unlock-card" aria-label="New bird in your Flock">
+              <p className="eyebrow">A NEW FRIEND FOR YOUR FLOCK</p>
+              <div className="unlock-bird-art" aria-hidden="true"><BirdIllustration bird={newlyUnlocked} small /></div>
               <div className="unlock-copy">
-  <small>joined your flock</small>
-  <h3>{newlyUnlocked.commonName}</h3>
-  <p>♪ {newlyUnlocked.mnemonic}</p>
-
-  <button
-    className="unlock-listen-button"
-    onClick={toggleUnlockedBirdSound}
-  >
-    <span>{isPlaying ? "■" : "♪"}</span>
-    {isPlaying ? "Stop call" : "Hear this bird"}
-  </button>
-</div>
+                <h3>{newlyUnlocked.commonName}</h3>
+                <p>Has joined your Flock!</p>
+                <button className="unlock-listen-button" aria-pressed={isPlaying && activeAudio === newlyUnlocked.audio} onClick={toggleUnlockedBirdSound}>{isPlaying && activeAudio === newlyUnlocked.audio ? "■ Stop call" : "♪ Hear your new bird"}</button>
+              </div>
+              <p className="unlock-home">Meet this bird on your Practice Perch, make music together in Studio, or choose it as a Bird Bestie in Your Nest.</p>
             </section>
           )}
+          {audioError && <div className="flight-audio-error" role="alert"><p>{audioError}</p><button onClick={() => playSound(lastRequestedBird.current)}>Retry bird call</button></div>}
 
-          {!newlyUnlocked && !modeLabel && unlockBird && (
-            <p className="unlock-goal" role="status">Score 8/10 or higher to welcome your next bird. {8 - score} more correct {8 - score === 1 ? "answer" : "answers"} would reach the goal. Your progress is saved—try another flight.</p>
-          )}
-          {!newlyUnlocked && !modeLabel && !unlockBird && (
-            <p className="flock-complete-note">
-              🦅 Your whole Birdsong flock is unlocked.
-            </p>
-          )}
+          {newlyUnlockedSongs.length > 0 && <section className="song-rewards" aria-label="New songs unlocked"><p className="eyebrow">A NEW SONG TO DISCOVER</p>{newlyUnlockedSongs.map(recording => {
+            const bird = birds.find(b => b.id === recording.birdId), singing = isPlaying && activeAudio === recording.audio;
+            return <article className="song-reward" key={recording.id}><div className="recognition-art" aria-hidden="true"><BirdIllustration bird={bird} small /></div><div><h3>{bird.commonName}</h3><p>Six in a row across three flights. Another song is yours to keep—and can join your next flight.</p><button className="review-button" aria-pressed={singing} onClick={() => playSound({...bird,audio:recording.audio})}>{singing ? '■ Stop new song' : '♪ Hear your new song'}</button></div></article>;})}<p>Welcoming a bird and recognizing its voice keep their own milestones.</p></section>}
+          {(newlyRecognized.length > 0 || earnedBadges.length > 0) && <div className="flight-growth">
+            {newlyRecognized.length > 0 && <section className="recognition-rewards" aria-label="Newly recognized voices">
+              <p className="eyebrow">A VOICE YOU KNOW</p>
+              {newlyRecognized.map(b => <div className="recognized-bird" key={b.id}><div className="recognition-art" aria-hidden="true"><BirdIllustration bird={b} small /></div><p><strong>{b.commonName}</strong><span>✓ Voice recognized</span></p></div>)}
+              <p>You’re learning to recognize these voices by ear. This is a listening milestone, separate from welcoming a bird into your Flock.</p>
+            </section>}
+            {earnedBadges.length > 0 && <section className="badge-rewards" aria-label="Newly earned badges"><p className="eyebrow">LOOK WHAT YOU EARNED</p><div className="flight-badges">{earnedBadges.map(b => <article key={b.id}><span aria-hidden="true">{b.icon}</span><div><h3>{b.name}</h3><p>New badge · {b.description}</p></div></article>)}</div></section>}
+          </div>}
 
-          <div className="flight-growth" aria-live="polite">
-            {newlyRecognized.map(b => <p key={b.id}>✓ {b.commonName} is now Recognized.</p>)}
-            {earnedBadges.map(b => <p key={b.id}>{b.icon} Badge earned: {b.name}</p>)}
-            {!newlyRecognized.length && !earnedBadges.length && <p>Every listen builds your ear. Your next flight will revisit developing voices.</p>}
-          </div>
-          {missed.length > 0 && <button className="review-button" onClick={() => { stopCurrentAudio(); onPracticeMissed?.(missed); }}>♪ Practice your {missed.length} tricky {missed.length === 1 ? 'bird' : 'birds'}</button>}
-          <button
-            className="primary-button"
-            onClick={restart}
-          >
-            Play Again
-            <span>↻</span>
-          </button>
+          {!newlyUnlocked && !newlyRecognized.length && !earnedBadges.length && !newlyUnlockedSongs.length && <p className="flight-saved-note">A few more voices in your memory. Your flight is saved; keep exploring at your own pace.</p>}
+          {!newlyUnlocked && !modeLabel && unlockBird && <p className="unlock-goal">Your next Flock friend is waiting. A score of 8/10 welcomes a new bird.</p>}
+          {!newlyUnlocked && !modeLabel && !unlockBird && <p className="flock-complete-note">Your whole Birdsong Flock is with you. There’s always another voice to get to know.</p>}
 
-          <button
-            className="text-button"
-            onClick={goHome}
-          >
-            Back to {modeLabel?"Birds nearby":"Play & Learn"}
-          </button>
+          <nav className="flight-result-actions" aria-label="After your flight">
+            <button className="primary-button" onClick={modeLabel ? () => { stopCurrentAudio(); onRegularFlight(); } : restart}>KEEP FLYING <span aria-hidden="true">→</span></button>
+            <p className="next-flight-note">Another ten-question flight. Your progress comes with you.</p>
+            <div className="flight-secondary-actions">
+              {missed.length > 0 && <button className="review-button" onClick={() => { stopCurrentAudio(); onPracticeMissed?.(missed); }}>♪ Practice the {missed.length === 1 ? 'bird' : `${missed.length} birds`} you missed</button>}
+              {newlyUnlocked && <button className="review-button" onClick={() => { stopCurrentAudio(); onVisitBird?.(newlyUnlocked.id); }}>Visit your {newlyUnlocked.commonName} →</button>}
+              <button className="text-button" onClick={goHome}>Return to {modeLabel ? "Birds nearby" : "Play & Learn"}</button>
+            </div>
+          </nav>
         </div>
       </main>
     );
@@ -450,7 +407,7 @@ function toggleUnlockedBirdSound() {
           className="back-button"
           onClick={goHome}
         >
-          ←
+          <span aria-hidden="true">←</span><span className="sr-only">Return to {modeLabel ? "Birds nearby" : "Play & Learn"}</span>
         </button>
 
         <div className="round-counter">
@@ -486,7 +443,7 @@ function toggleUnlockedBirdSound() {
           WHO'S SINGING?
         </p>
 
-        <h2>Listen closely.</h2>
+        <h2 ref={headingRef} tabIndex={-1}>Listen closely.</h2>
 
         <button
           className={`sound-button ${
@@ -515,9 +472,10 @@ function toggleUnlockedBirdSound() {
             </small>
           </span>
         </button>
+        {audioError && <div className="flight-audio-error" role="alert"><p>{audioError}</p><button onClick={toggleBirdSound}>Retry bird call</button></div>}
       </section>
 
-      <section className="bird-options">
+      <section className="bird-options" aria-label="Choose the singing bird">
         {currentRound.options.map(
           (bird) => {
             const wasSelected =
@@ -582,11 +540,11 @@ function toggleUnlockedBirdSound() {
               : "answer-wrong"
           }`}
         >
-          <div>
-            <p className="answer-status">
+          <div className="answer-summary" ref={feedbackRef} tabIndex={-1} role="group" aria-label={isCorrect ? `Nice ear! ${currentRound.correct.commonName}.` : `That was ${currentRound.correct.commonName}.`} >
+            <div role="status"><p className="answer-status">
               {isCorrect
                 ? "✓ Nice ear!"
-                : "Almost!"}
+                : "Another listen for this one."}
             </p>
 
             {!isCorrect && (
@@ -602,35 +560,24 @@ function toggleUnlockedBirdSound() {
               </p>
             )}
 
-            <h3>
-              {
-                currentRound.correct
-                  .mnemonic
-              }
-            </h3>
-
-            <p>
-              {
-                currentRound.correct
-                  .fact
-              }
-            </p>
+            </div>
+            <button className="answer-next" onClick={nextRound}>
+              {roundIndex === 9 ? "See Score" : "Next Bird"}<span aria-hidden="true">→</span>
+            </button>
           </div>
-
-          <button onClick={nextRound}>
-            {roundIndex === 9
-              ? "See Score"
-              : "Next Bird"}
-
-            <span>→</span>
-          </button>
+          <div className="answer-field-note">
+            <h3>{currentRound.correct.mnemonic}</h3>
+            <p>{currentRound.correct.fact}</p>
+          </div>
         </section>
       )}
     </main>
   );
 }
 
-function PracticeScreen({ onHome, birdPool, targeted = false, outdoor = false }) {
+function PracticeScreen({ onHome, onPlay, history = [], sessions = [], birdPool, targeted = false, outdoor = false, visiting = false }) {
+  const [recordingSelections, setRecordingSelections] = useState({});
+  const [practiceError, setPracticeError] = useState(null);
   const audioRef = useRef(null);
   const [activeBirdId, setActiveBirdId] =
     useState(null);
@@ -646,7 +593,8 @@ function PracticeScreen({ onHome, birdPool, targeted = false, outdoor = false })
   }
 
   function togglePracticeSound(bird) {
-    if (!bird.audio) return;
+    setPracticeError(null);
+    if (!bird.audio) { setPracticeError(bird); return; }
 
     // Clicking the bird that is already playing stops it.
     if (
@@ -671,24 +619,17 @@ function PracticeScreen({ onHome, birdPool, targeted = false, outdoor = false })
     setActiveBirdId(bird.id);
 
     audio.onended = () => {
+      if (audioRef.current !== audio) return;
       audioRef.current = null;
       setActiveBirdId(null);
     };
-
-    audio.onerror = () => {
-      audioRef.current = null;
-      setActiveBirdId(null);
+    const failed = () => {
+      if (audioRef.current !== audio) return;
+      stopPracticeAudio();
+      setPracticeError(bird);
     };
-
-    audio.play().catch((error) => {
-      console.error(
-        "Could not play bird audio:",
-        error
-      );
-
-      audioRef.current = null;
-      setActiveBirdId(null);
-    });
+    audio.onerror = failed;
+    audio.play().catch(failed);
   }
 
   function goHome() {
@@ -719,23 +660,29 @@ function PracticeScreen({ onHome, birdPool, targeted = false, outdoor = false })
           PRACTICE PERCH
         </p>
 
-        <h2>{outdoor ? "Remember this voice." : targeted ? "Your next breakthrough." : "Meet the flock."}</h2>
+        <h2>{outdoor ? "Remember this voice." : visiting ? "Meet your new Flock friend." : targeted ? "Your next breakthrough." : "Meet the flock."}</h2>
 
         <p>
-          {outdoor ? "Compare this call with what you heard outside. Listening here won’t affect accuracy or unlock your game flock." : targeted ? "Listen to the voices you missed, then return for another flight. Listening here won’t affect accuracy." : "Tap a bird to hear its call. Start with eight birds. Score 8/10 or higher in a flight to grow your practice perch."}
+          {outdoor ? "Compare this call with what you heard outside. Listening here won’t affect accuracy or unlock your game flock." : visiting ? "Your new bird is here! Hear its call, then take your ears on another flight. You can also find this bird in Studio and Your Nest." : targeted ? "Listen to the voices you missed, then return for another flight. Listening here won’t affect accuracy." : "Tap a bird to hear its call. Start with eight birds. Score 8/10 or higher in a flight to grow your practice perch."}
         </p>
       </header>
 
+      {!outdoor && <button className="primary-button practice-flight" onClick={() => { stopPracticeAudio(); onPlay(); }}>KEEP FLYING <span>→</span></button>}
       <div className="practice-flock-count">
         {outdoor ? "Your outdoor discovery" : targeted ? `${birdPool.length} voices to revisit` : `${birdPool.length} of ${birds.length} birds in your flock`}
       </div>
 
       <div className="collection-grid">
         {birdPool.map((bird) => {
+          const song = songProgress(history, sessions, bird.id);
+          const recordings = outdoor ? referenceRecordings(bird).slice(0, 1) : referenceRecordings(bird);
+          const recordingIndex = Math.max(0, recordings.findIndex(recording => recording.id === recordingSelections[bird.id]));
+          const recording = recordings[recordingIndex];
           const isPlaying =
             activeBirdId === bird.id;
 
           return (
+            <article className="practice-entry" key={bird.id}>
             <button
               className={`practice-card ${
                 isPlaying
@@ -744,7 +691,7 @@ function PracticeScreen({ onHome, birdPool, targeted = false, outdoor = false })
               }`}
               key={bird.id}
               onClick={() =>
-                togglePracticeSound(bird)
+                togglePracticeSound({ ...bird, audio: recording?.audio || bird.audio })
               }
               aria-pressed={isPlaying}
             >
@@ -768,9 +715,19 @@ function PracticeScreen({ onHome, birdPool, targeted = false, outdoor = false })
                   {isPlaying
                     ? "■ Stop call"
                     : "♪ Hear call"}
+                  {recordings.length > 1 && <small className="practice-recording-count">Recording {recordingIndex + 1} of {recordings.length}</small>}
                 </span>
               </div>
             </button>
+            {recordings.length > 1 && !outdoor && <p className="practice-song-status">{song.unlocked ? "✓ New song ready for flights" : "Preview here · earn this song for flights"}</p>}
+            {recordings.length > 1 && !outdoor && <button className="practice-another-recording" aria-label={`Hear another recording of ${bird.commonName}`} onClick={() => {
+              const next = recordings[(recordingIndex + 1) % recordings.length];
+              stopPracticeAudio();
+              setRecordingSelections(current => ({ ...current, [bird.id]: next.id }));
+              togglePracticeSound({ ...bird, audio: next.audio });
+            }}>♪ Hear another recording</button>}
+            {practiceError?.id === bird.id && <div className="flight-audio-error" role="alert"><p>This recording couldn’t play. Check your connection and try again.</p><button onClick={() => togglePracticeSound(practiceError)}>Retry bird call</button></div>}
+            </article>
           );
         })}
       </div>
@@ -1498,13 +1455,13 @@ function CreditsScreen({ onHome }) {
       </header>
 
       <div className="credits-list">
-        {audioCredits.map((credit) => (
+        {[...audioCredits, ...djChirps].map((credit) => (
           <article
             className="credit-card"
-            key={credit.bird}
+            key={credit.id || credit.sourceUrl}
           >
             <div>
-              <h3>{credit.bird}</h3>
+              <h3>{credit.bird || credit.name}</h3>
 
               <p>
                 Recording by{" "}
@@ -1588,10 +1545,11 @@ function AppContent() {
   const [focusBirdId,setFocusBirdId] = useState(null);
   const [sessions, setSessions] = useState(() => readStoredJSON("birdsong-sessions-v1", []));
   const [practiceIds, setPracticeIds] = useState(null);
+  const [practiceVisit, setPracticeVisit] = useState(false);
   const [practiceOutdoor, setPracticeOutdoor] = useState(false);
   useEffect(() => localStorage.setItem("birdsong-sessions-v1", JSON.stringify(sessions)), [sessions]);
   const completeFlight = session => setSessions(current => current.some(s => s.id === session.id) ? current : [...current, session]);
-  const practiceMissed = (ids, outdoor = false) => { setPracticeOutdoor(outdoor); setPracticeIds(ids); setScreen("practice"); };
+  const practiceMissed = (ids, outdoor = false) => { setPracticeVisit(false); setPracticeOutdoor(outdoor); setPracticeIds(ids); setScreen("practice"); };
   const [screen, setScreen] =
     useState("home");
   useEffect(() => { window.scrollTo({ top: 0, behavior: "instant" }); }, [screen]);
@@ -1678,7 +1636,7 @@ function AppContent() {
     catch {window.dispatchEvent(new CustomEvent('birdsong-world-reward',{detail:'This browser couldn’t save your Flock reward. You can try this milestone again.'}));}
   }
   if(screen==='advanced')return <AdvancedListening history={history} onHome={()=>setScreen('learn')}/>;
-  const learningProps={onAdvanced:()=>setScreen('advanced'),onHome:()=>setScreen('home'),onPlay:id=>{setFocusBirdId(typeof id==='string'?id:null);setScreen('game');},onPractice:()=>{setPracticeIds(null);setPracticeOutdoor(false);setScreen('practice');},onBadges:()=>setScreen('badges'),onSoundAlikes:()=>setScreen('sound-alikes'),onStudio:()=>navigate('studio'),discoveredBirds,history,sessions,spottedBirds};
+  const learningProps={onAdvanced:()=>setScreen('advanced'),onHome:()=>setScreen('home'),onPlay:id=>{setFocusBirdId(typeof id==='string'?id:null);setScreen('game');},onPractice:()=>{setPracticeVisit(false);setPracticeIds(null);setPracticeOutdoor(false);setScreen('practice');},onBadges:()=>setScreen('badges'),onSoundAlikes:()=>setScreen('sound-alikes'),onStudio:()=>navigate('studio'),discoveredBirds,history,sessions,spottedBirds};
   if(screen==='learn')return <LearnScreen {...learningProps}/>;
   if(screen==='explore')return <ExploreWorld onHome={()=>setScreen('home')} onListen={()=>setScreen('listen')} onNearby={()=>setScreen('nearby')} onGuide={()=>setScreen('guide')} onCalls={()=>setScreen('calls')} onMilestone={awardMilestone}/>;
   if(screen==='sanctuary')return <Sanctuary onHome={()=>setScreen('home')} BirdArt={BirdIllustration} discoveredBirds={discoveredBirds} history={history} spottedBirds={spottedBirds} claims={claims} onMilestone={awardMilestone}/>;
@@ -1734,7 +1692,7 @@ function AppContent() {
         unlockBird={nextUnlockBird || null}
         birdPool={unlockedBirds}
         personalClips={personalClips} focusBirdId={focusBirdId}
-        history={history} sessions={sessions} spottedBirds={spottedBirds} onComplete={completeFlight} onPracticeMissed={practiceMissed}
+        history={history} sessions={sessions} spottedBirds={spottedBirds} onComplete={completeFlight} onPracticeMissed={practiceMissed} onRegularFlight={() => { setFocusBirdId(null); setScreen("game"); }} onVisitBird={id => { setPracticeVisit(true); setPracticeOutdoor(false); setPracticeIds([id]); setScreen("practice"); }}
       />
     );
   }
@@ -1746,7 +1704,9 @@ function AppContent() {
           setScreen(practiceOutdoor?"listen":"learn")
         }
         birdPool={practiceIds ? birds.filter(b => practiceIds.includes(b.id)) : unlockedBirds}
-        targeted={Boolean(practiceIds)} outdoor={practiceOutdoor}
+        onPlay={() => { setFocusBirdId(null); setScreen("game"); }}
+        history={history} sessions={sessions}
+        targeted={Boolean(practiceIds)} outdoor={practiceOutdoor} visiting={practiceVisit}
       />
     );
   }
@@ -1777,7 +1737,7 @@ function AppContent() {
         onGuess={recordGuess}
         birdPool={nearbyPool}
         modeLabel="NEARBY"
-        history={history} sessions={sessions} spottedBirds={spottedBirds} onComplete={completeFlight} onPracticeMissed={practiceMissed}
+        history={history} sessions={sessions} spottedBirds={spottedBirds} onComplete={completeFlight} onPracticeMissed={practiceMissed} onRegularFlight={() => { setFocusBirdId(null); setScreen("game"); }} onVisitBird={id => { setPracticeVisit(true); setPracticeOutdoor(false); setPracticeIds([id]); setScreen("practice"); }}
       />
     );
   }
@@ -1824,4 +1784,4 @@ function AppContent() {
 }
 function WorldRewardNotice(){const [notice,setNotice]=useState('');useEffect(()=>{const show=e=>setNotice(e.detail);window.addEventListener('birdsong-world-reward',show);return()=>window.removeEventListener('birdsong-world-reward',show);},[]);return notice?<aside className="world-reward-notice" aria-label="Flock update"><p role="status">{notice}</p><button aria-label="Dismiss Flock update" onClick={()=>setNotice('')}>×</button></aside>:null;}
 
-export default function App() { return <><div className="world-clouds" aria-hidden="true"><span className="cloud cloud-one"/><span className="cloud cloud-two"/><span className="cloud cloud-three"/></div><AppContent /><WorldRewardNotice /><footer className="studio-footer">Designed by 2e Studio</footer></>; }
+export default function App() { if (import.meta.env.DEV && new URLSearchParams(window.location.search).get("workbench") === "audio") return <Suspense fallback={<main className="world-screen screen"><p>Opening your audio library…</p></main>}><LibraryWorkbench BirdArt={BirdIllustration}/><footer className="studio-footer">Designed by 2e Studio</footer></Suspense>; return <><div className="world-clouds" aria-hidden="true"><span className="cloud cloud-one"/><span className="cloud cloud-two"/><span className="cloud cloud-three"/></div><AppContent /><WorldRewardNotice /><footer className="studio-footer">Designed by 2e Studio</footer></>; }

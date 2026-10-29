@@ -25,3 +25,9 @@ dist-ssr
 
 # Downloaded noncommercial BirdNET prototype model
 .birdnet-local/
+
+# Local authoring drafts; approved chirps live in public/audio/chirps.
+.birdsong-library/
+
+# Local browser QA reports and screenshots.
+artifacts/

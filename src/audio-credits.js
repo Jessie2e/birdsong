@@ -1,6 +1,8 @@
+import { learningRecordings } from "./data/learning-recordings.js";
+
 export const audioCredits = [
   {
-    bird: "Northern Cardinal",
+    bird: "Northern Cardinal", birdId: "cardinal",
     creator: "G. McGrane",
     source: "Wikimedia Commons",
     sourceUrl:
@@ -8,7 +10,7 @@ export const audioCredits = [
     license: "Public Domain",
   },
   {
-    bird: "American Robin",
+    bird: "American Robin", birdId: "robin",
     creator: "G. McGrane",
     source: "Wikimedia Commons",
     sourceUrl:
@@ -16,7 +18,7 @@ export const audioCredits = [
     license: "Public Domain",
   },
   {
-    bird: "Blue Jay",
+    bird: "Blue Jay", birdId: "bluejay",
     creator: "G. McGrane",
     source: "Wikimedia Commons",
     sourceUrl:
@@ -24,7 +26,7 @@ export const audioCredits = [
     license: "Public Domain",
   },
   {
-    bird: "Carolina Wren",
+    bird: "Carolina Wren", birdId: "carolina-wren",
     creator: "G. McGrane",
     source: "Wikimedia Commons",
     sourceUrl:
@@ -32,7 +34,7 @@ export const audioCredits = [
     license: "Public Domain",
   },
   {
-    bird: "Black-capped Chickadee",
+    bird: "Black-capped Chickadee", birdId: "chickadee",
     creator: "Jonathon Jongsma",
     source: "Xeno-canto via Wikimedia Commons",
     sourceUrl:
@@ -43,7 +45,7 @@ export const audioCredits = [
     edited: false,
   },
   {
-    bird: "Mourning Dove",
+    bird: "Mourning Dove", birdId: "mourning-dove",
     creator: "Francis C., Ortega C. & Cruz A.",
     source: "Wikimedia Commons",
     sourceUrl:
@@ -54,7 +56,7 @@ export const audioCredits = [
     edited: false,
   },
   {
-    bird: "Tufted Titmouse",
+    bird: "Tufted Titmouse", birdId: "titmouse",
     creator: "U.S. Fish & Wildlife Service",
     source: "Wikimedia Commons",
     sourceUrl:
@@ -62,7 +64,7 @@ export const audioCredits = [
     license: "Public Domain",
   },
   {
-    bird: "Eastern Bluebird",
+    bird: "Eastern Bluebird", birdId: "eastern-bluebird",
     creator: "Jonathon Jongsma",
     source: "Xeno-canto via Wikimedia Commons",
     sourceUrl:
@@ -73,7 +75,7 @@ export const audioCredits = [
     edited: false,
   },
   {
-    bird: "White-breasted Nuthatch",
+    bird: "White-breasted Nuthatch", birdId: "nuthatch",
     creator: "G. McGrane",
     source: "Wikimedia Commons",
     sourceUrl:
@@ -81,7 +83,7 @@ export const audioCredits = [
     license: "Public Domain",
   },
   {
-    bird: "House Finch",
+    bird: "House Finch", birdId: "house-finch",
     creator: "Francis C., Ortega C. & Cruz A.",
     source: "Wikimedia Commons",
     sourceUrl:
@@ -92,7 +94,7 @@ export const audioCredits = [
     edited: false,
   },
   {
-    bird: "American Crow",
+    bird: "American Crow", birdId: "american-crow",
     creator: "G. McGrane",
     source: "Wikimedia Commons",
     sourceUrl:
@@ -100,7 +102,7 @@ export const audioCredits = [
     license: "Public Domain",
   },
   {
-    bird: "Red-bellied Woodpecker",
+    bird: "Red-bellied Woodpecker", birdId: "red-bellied-woodpecker",
     creator: "Jonathon Jongsma",
     source: "Xeno-canto via Wikimedia Commons",
     sourceUrl:
@@ -111,7 +113,7 @@ export const audioCredits = [
     edited: false,
   },
   {
-    bird: "Barred Owl",
+    bird: "Barred Owl", birdId: "barred-owl",
     creator: "Tom Cosburn",
     source: "British Library via Wikimedia Commons",
     sourceUrl:
@@ -122,7 +124,7 @@ export const audioCredits = [
     edited: false,
   },
   {
-    bird: "Eastern Towhee",
+    bird: "Eastern Towhee", birdId: "eastern-towhee",
     creator: "Jonathon Jongsma",
     source: "Xeno-canto via Wikimedia Commons",
     sourceUrl:
@@ -133,7 +135,7 @@ export const audioCredits = [
     edited: false,
   },
   {
-    bird: "Killdeer",
+    bird: "Killdeer", birdId: "killdeer",
     creator: "U.S. National Park Service",
     source: "Wikimedia Commons",
     sourceUrl:
@@ -141,7 +143,7 @@ export const audioCredits = [
     license: "Public Domain",
   },
   {
-    bird: "Northern Mockingbird",
+    bird: "Northern Mockingbird", birdId: "northern-mockingbird",
     creator: "David Illig",
     source: "Wikimedia Commons",
     sourceUrl:
@@ -152,7 +154,7 @@ export const audioCredits = [
     edited: false,
   },
   {
-    bird: "Carolina Chickadee",
+    bird: "Carolina Chickadee", birdId: "carolina-chickadee",
     creator: "G. McGrane",
     source: "Wikimedia Commons",
     sourceUrl:
@@ -160,27 +162,28 @@ export const audioCredits = [
     license: "Public Domain",
   },
   {
-    bird: "Red-shouldered Hawk", creator: "Tony Phillips", source: "Wikimedia Commons",
+    bird: "Red-shouldered Hawk", birdId: "red-shouldered-hawk", creator: "Tony Phillips", source: "Wikimedia Commons",
     sourceUrl: "https://commons.wikimedia.org/wiki/File:Buteo_lineatus.ogg",
     license: "CC BY 3.0", licenseUrl: "https://creativecommons.org/licenses/by/3.0/", edited: false,
   },
   {
-    bird: "Yellow-rumped Warbler", creator: "Jonathon Jongsma", source: "Xeno-canto via Wikimedia Commons",
+    bird: "Yellow-rumped Warbler", birdId: "yellow-rumped-warbler", creator: "Jonathon Jongsma", source: "Xeno-canto via Wikimedia Commons",
     sourceUrl: "https://commons.wikimedia.org/wiki/File:Setophaga_coronata_coronata_-_Myrtle_Warbler_-_XC78057.ogg",
     license: "CC BY-SA 3.0", licenseUrl: "https://creativecommons.org/licenses/by-sa/3.0/", edited: false,
     note: "Song of the Myrtle form of Yellow-rumped Warbler (XC78057).",
   },
   {
-    bird: "Eastern Phoebe", creator: "Jonathon Jongsma", source: "Xeno-canto via Wikimedia Commons",
+    bird: "Eastern Phoebe", birdId: "eastern-phoebe", creator: "Jonathon Jongsma", source: "Xeno-canto via Wikimedia Commons",
     sourceUrl: "https://commons.wikimedia.org/wiki/File:Sayornis_phoebe_-_Eastern_Phoebe_XC132866.ogg",
     license: "CC BY-SA 3.0", licenseUrl: "https://creativecommons.org/licenses/by-sa/3.0/", edited: false,
   },
   {
-    bird: "Red-winged Blackbird", creator: "G. McGrane", source: "Wikimedia Commons",
+    bird: "Red-winged Blackbird", birdId: "red-winged-blackbird", creator: "G. McGrane", source: "Wikimedia Commons",
     sourceUrl: "https://commons.wikimedia.org/wiki/File:Red-winged_Blackbird.ogg", license: "Public Domain", edited: false,
   },
   {
-    bird: "American Goldfinch", creator: "U.S. Fish & Wildlife Service", source: "Wikimedia Commons",
+    bird: "American Goldfinch", birdId: "american-goldfinch", creator: "U.S. Fish & Wildlife Service", source: "Wikimedia Commons",
     sourceUrl: "https://commons.wikimedia.org/wiki/File:30goldfinch.ogg", license: "Public Domain", edited: false,
   },
+  ...learningRecordings,
 ];

@@ -76,3 +76,17 @@ The worker no longer discards nonzero recordings using a whole-recording absolut
 ## Listening playback layout
 
 Recording controls stay expanded, with a fixed mobile Record/Stop control after the kit loads. Detection sensitivity and recording diagnostics are collapsed beneath playback in section 3. Bird circles use the same color/number as the waveform’s detection spans; overlapping model windows are merged per visible species at the selected cutoff. Highlights use those same filtered windows, and estimated timestamps have a text alternative. Markers remain approximate three-second model windows, not isolated chirp timing. Portrait labels now say Tap for details or Suggested in this moment.
+
+## Refined flights and earned song variety
+
+Regular flights still use ten questions, existing scores, collection thresholds, recognition and mastery. Mobile illustrated answer cards keep feedback and Next Bird close to the choices. Results celebrate actual newly welcomed birds, recognition and badges, with Keep Flying as the primary action and missed-bird practice, visit and return routes. Advanced listening samples all eligible recognized species before choosing its six targets.
+
+Eight additional credited learning excerpts are hosted in `public/audio/learning`. Six consecutive correct familiar-recording answers across at least three completed regular flights earn a species’ additional song. Practice can preview these songs before they enter scored flights. Earned availability is derived from existing history and sessions, remains after later misses, and does not introduce another badge or storage format. Personal recording eligibility and the three-question cap are unchanged.
+
+## Shared DJ chirps and local authoring
+
+Approved cuts in `src/data/dj-chirps.json` and `public/audio/chirps` are included in production. New DJ arrangements default to the most recently approved chirp for each preset bird. The sound list offers every approved cut first, followed by original songs and personal phrases. Existing saved arrangements retain stable source IDs and their original sounds; chirp colors follow the underlying bird.
+
+Run the local Vite server and open `/?workbench=audio` to edit the shared library. Choose/reopen a source, trim and preview, then explicitly approve and choose Add to DJ library. Drafts are private project-local files in ignored `.birdsong-library`; approving writes a credited, checksummed WAV into the production library. Editing an approved sound makes a copy. The authoring UI and save API are development-only; they are not published. Committing and deploying approved assets makes them available on the live site.
+
+Listen outside automatically runs Find Birds when microphone recording stops, including the 45-second limit. The microphone is released before local analysis starts. Short/invalid clips show a helpful error; manual Find Birds remains available for retry or uploaded files. No microphone audio is uploaded.

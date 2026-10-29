@@ -1,11 +1,12 @@
-import {useMemo,useRef,useState} from 'react';
+import {useEffect,useMemo,useRef,useState} from 'react';
 import {MIN_PHRASE,moveSelection,resizeSelection,waveformPeaks,waveformWindow} from './waveform-selection';
 const clamp=(x,a,b)=>Math.max(a,Math.min(b,x));
 const stamp=t=>`${Math.floor(t/60)}:${(t%60).toFixed(2).padStart(5,'0')}`;
-export default function WaveformEditor({buffer,start,end,onChange,disabled=false,playhead=null}) {
+export default function WaveformEditor({buffer,start,end,onChange,disabled=false,playhead=null,selectionFocusKey=null}) {
  const duration=buffer.duration;
  const [view,setView]=useState(()=>waveformWindow(0,Math.min(10,duration),duration)),[height,setHeight]=useState(1);
  const detail=useRef(null),overview=useRef(null),drag=useRef(null);
+ useEffect(()=>{if(selectionFocusKey===null)return;const span=Math.max(1,(end-start)*1.6);setView(waveformWindow((start+end-span)/2,span,duration));},[selectionFocusKey,buffer]);
  const fullPeaks=useMemo(()=>waveformPeaks(buffer,0,duration,700),[buffer,duration]);
  const peaks=useMemo(()=>waveformPeaks(buffer,view.start,view.start+view.span,900),[buffer,view.start,view.span]);
  const sourcePeak=Math.max(.00001,...fullPeaks),selection={start,end};

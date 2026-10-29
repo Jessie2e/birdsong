@@ -419,7 +419,7 @@ button {
 .game-screen,
 .collection-screen,
 .results-screen {
-  background: var(--cream);
+  background: transparent;
   padding: 22px 18px 40px;
 }
 
@@ -1303,19 +1303,19 @@ button {
 
 @keyframes bird-hop {
   0% {
-    transform: translateY(0);
+    transform: translateY(0) scale(.66);
   }
 
   35% {
-    transform: translateY(-12px) rotate(-2deg);
+    transform: translateY(-12px) scale(.66) rotate(-2deg);
   }
 
   65% {
-    transform: translateY(2px) rotate(1deg);
+    transform: translateY(2px) scale(.66) rotate(1deg);
   }
 
   100% {
-    transform: translateY(0);
+    transform: translateY(0) scale(.66);
   }
 }
 
@@ -1572,7 +1572,7 @@ button {
   max-width: 760px;
   margin: 0 auto;
   padding: 22px 18px 60px;
-  background: var(--cream);
+  background: transparent;
 }
 
 .credits-list {
@@ -3405,7 +3405,7 @@ dialog.call-editor::backdrop {background:#17392e88;}
 dialog.call-editor button:focus-visible,dialog.call-editor input:focus-visible {outline:3px solid #b75a40;outline-offset:3px;}
 
 /* Birdsong world: four equal invitations, one shared flock. */
-.bird-hub {padding:40px max(24px,calc((100vw - 1100px)/2)) 24px;background:radial-gradient(ellipse at 5% 0%,#e2e9d4,transparent 55%),var(--cream);min-height:calc(100vh - 70px);}
+.bird-hub {padding:40px max(24px,calc((100vw - 1100px)/2)) 24px;background:radial-gradient(ellipse at 5% 0%,#e2e9d4,transparent 55%);min-height:calc(100vh - 70px);}
 .hub-header {text-align:center;margin:0 auto 34px;}.hub-wordmark {font-family:Fraunces,serif;color:var(--dark-green);font-size:clamp(64px,9vw,104px);letter-spacing:-.075em;line-height:1;margin:12px 0;}.hub-wordmark span{color:var(--rust);}.hub-invitation{font-size:20px;margin:14px 0;color:#50645a;}
 .hub-destinations {display:grid;grid-template-columns:1fr 1fr;gap:18px;}.hub-door{border:1px solid var(--line);border-radius:26px;min-height:222px;position:relative;overflow:hidden;text-align:left;padding:26px;color:var(--dark-green);display:flex;align-items:center;transition:transform .2s,box-shadow .2s;}.hub-door:hover{transform:translateY(-3px);box-shadow:0 8px 20px #294f4510;}.hub-door:focus-visible{outline:3px solid var(--rust);outline-offset:4px;}.hub-door.sage{background:#dce7cf;}.hub-door.sky{background:#dce6e5;}.hub-door.peach{background:#efddce;}.hub-door.butter{background:#eee6c9;}.hub-door-copy{display:flex;flex-direction:column;align-items:flex-start;gap:12px;width:65%;position:relative;z-index:1;}.hub-door-copy .eyebrow{font-size:10px;margin:0;}.hub-door-copy>strong{font-family:Fraunces,serif;font-size:31px;letter-spacing:-.04em;line-height:1.1;}.hub-door-copy>span:not(.eyebrow){font-size:14px;line-height:1.5;}.hub-door-link{font-weight:700;margin-top:6px;}.hub-bird{position:absolute;right:8px;bottom:0;width:180px;height:185px;pointer-events:none;}.hub-bird .bird-illustration.bird-small{position:absolute;width:180px;height:170px;left:50%;top:50%;margin:0;transform:translate(-50%,-50%) scale(.78);}
 .hub-bottom{display:flex;justify-content:space-between;gap:24px;padding:26px 4px 12px;align-items:center;}.hub-bottom p{font-size:14px;line-height:1.6;margin:8px 0;}.hub-bottom .eyebrow{font-size:10px;}.hub-text-button,.hub-credits{background:none;border:0;color:var(--green);padding:8px 0;min-height:44px;text-decoration:underline;text-underline-offset:4px;}.hub-resume button{display:flex;justify-content:space-between;gap:40px;background:var(--paper);border:1px solid var(--line);border-radius:12px;padding:12px 18px;min-height:44px;color:var(--green);margin-top:8px;}.hub-first-visit{color:var(--muted);}.hub-credits{display:block;margin:0 auto;font-size:12px;}
@@ -3464,3 +3464,160 @@ dialog.call-editor button:focus-visible,dialog.call-editor input:focus-visible {
 .mic-mode{display:flex;flex-direction:column;gap:7px;text-align:left;max-width:500px;margin:16px auto;font-size:14px}.mic-mode select{width:100%;max-width:100%;min-height:44px;white-space:normal;border:1px solid var(--line);border-radius:12px;padding:10px;background:#f8f7ed;color:var(--green);font:inherit}.mic-details{border:1px solid var(--line);border-radius:16px;padding:12px 16px;margin:18px 0;background:var(--paper);font-size:13px;line-height:1.65;overflow-wrap:anywhere}.mic-details summary{cursor:pointer;min-height:44px;display:flex;align-items:center}.recording-quality p{margin:8px 0}
 .listening-detection-details,.flock-moments{border-top:1px solid var(--line);margin-top:16px;padding-top:6px;font-size:13px;line-height:1.6}.listening-detection-details>summary,.flock-moments>summary{cursor:pointer;min-height:44px;display:flex;align-items:center;gap:8px;color:var(--green);font-weight:700}.listening-detection-details>summary:before,.flock-moments>summary:before{content:'＋'}.listening-detection-details[open]>summary:before,.flock-moments[open]>summary:before{content:'−'}.listening-detection-details .recording-result{margin:8px 0;padding:12px}.listening-detection-details .recording-quality{font-size:12px}.listening-flock .flock-portrait{border-color:var(--bird-color);border-width:3px}.listening-flock .flock-voice.is-singing .flock-portrait{border-color:var(--bird-color);box-shadow:0 0 0 5px color-mix(in srgb,var(--bird-color) 25%,transparent)}.flock-color-number{position:absolute;bottom:-3px;right:-4px;width:24px;height:24px;display:grid;place-items:center;background:var(--bird-color);color:white;border-radius:50%;font-size:11px;font-weight:700;z-index:2;border:2px solid #fffdf5}.mobile-record-dock{display:none}.record-inline{display:contents}
 @media(max-width:760px){.mobile-record-dock{display:block;position:fixed;left:50%;bottom:max(14px,env(safe-area-inset-bottom));transform:translateX(-50%);z-index:40;padding:6px;border-radius:100px;background:#f7f5e9f2;border:1px solid #c6cfbb;box-shadow:0 5px 25px #173d3033;max-width:calc(100vw - 24px);width:max-content}.mobile-record-dock .primary-button{margin:0;min-height:48px;min-width:190px;padding:12px 22px;font-size:15px}.mobile-record-dock.is-recording .primary-button{background:#a74837}.outdoor-screen:has(.mobile-record-dock){padding-bottom:100px}.record-inline{display:none}.listening-detection-details>summary{font-size:13px}.flock-transport{position:relative;z-index:1}}
+
+/* Stage A: keep the next little flight within reach. */
+.sr-only { position:absolute; width:1px; height:1px; padding:0; margin:-1px; overflow:hidden; clip:rect(0,0,0,0); white-space:nowrap; border:0; }
+.game-screen .back-button { min-height:44px; min-width:44px; }
+.game-screen .game-prompt { padding:20px 0 16px; }
+.game-screen .game-prompt h2 { margin:4px 0 14px; }
+.game-screen .flight-unlock-target { margin:10px 0 0; }
+.game-screen .answer-card { padding:16px; }
+.answer-summary { display:flex; align-items:center; justify-content:space-between; gap:16px; scroll-margin:12px; }
+.answer-summary > div { min-width:0; }
+.answer-summary .answer-reveal { margin:0; line-height:1.4; }
+.answer-next { flex-shrink:0; display:flex; align-items:center; justify-content:space-between; gap:14px; border:0; border-radius:100px; background:var(--green); color:var(--paper); min-height:48px; padding:12px 18px; font-weight:700; }
+.answer-field-note { border-top:1px solid var(--line); margin-top:14px; padding-top:14px; }
+.answer-field-note p { margin:0; font-size:.9rem; line-height:1.5; color:var(--muted); }
+.game-screen :focus-visible, .results-screen :focus-visible, .practice-flight:focus-visible { outline:3px solid var(--rust); outline-offset:4px; }
+.game-screen h2:focus, .flight-celebration h1:focus { outline:none; }
+.flight-audio-error { background:#f1dfd8; border-radius:14px; padding:12px; margin-top:12px; text-align:left; font-size:.9rem; }
+.flight-audio-error p { margin:0 0 8px; line-height:1.4; }
+.flight-audio-error button { min-height:44px; border:1px solid var(--rust); border-radius:12px; padding:8px 14px; background:var(--paper); color:var(--dark-green); font-weight:700; }
+.results-screen { display:block; max-width:860px; margin:auto; padding:20px 24px 32px; }
+.results-screen > .back-button { position:static; display:block; min-height:44px; }
+.results-card { width:100%; max-width:680px; margin:12px auto 0; }
+.flight-celebration { padding:22px 20px; border-radius:28px; background:radial-gradient(ellipse at top,#efe3bf,transparent 78%); }
+.high-flight .flight-celebration, .perfect-flight .flight-celebration { background:radial-gradient(ellipse at top,#e8d390,transparent 80%); }
+.flight-celebration .eyebrow { margin:0 0 14px; }
+.flight-celebration .flight-rating { margin:0; font-weight:700; color:var(--green); }
+.flight-celebration h1 { font-family:Fraunces,serif; color:var(--dark-green); font-size:clamp(76px,12vw,104px); letter-spacing:-.07em; line-height:1; margin:16px 0; }
+.flight-celebration h1 > span { font-size:.44em; letter-spacing:-.04em; }
+.flight-celebration h1 > small { display:block; font-family:'DM Sans',sans-serif; font-size:14px; letter-spacing:0; margin-top:10px; color:var(--muted); font-weight:500; }
+.results-card .flight-celebration h2 { font-size:clamp(26px,4vw,34px); line-height:1.15; margin:18px 0 10px; }
+.flight-celebration > p:last-child { line-height:1.5; margin:0; font-size:15px; }
+.results-card .unlock-card { grid-template-columns:150px minmax(0,1fr); gap:12px 18px; padding:22px; margin:12px 0; }
+.results-card .unlock-bird-art { width:150px; height:125px; position:relative; justify-self:center; }
+.results-card .unlock-bird-art .bird-small { position:absolute; width:180px; height:170px; left:50%; top:50%; margin:0; transform:translate(-50%,-50%) scale(.78); }
+.results-card .unlock-copy { padding:0; }
+.results-card .unlock-copy h3 { font-size:27px; margin-bottom:8px; }
+.results-card .unlock-copy p { font-size:14px; }
+.results-card .unlock-home { grid-column:1/-1; margin:0; line-height:1.5; font-size:14px; color:var(--green); }
+.results-card .unlock-listen-button { min-height:44px; margin-top:12px; }
+.results-card .flight-growth { padding:0; margin:14px 0; text-align:left; background:transparent; display:grid; gap:12px; }
+.recognition-rewards, .badge-rewards { border:1px solid var(--line); border-radius:22px; background:var(--paper); padding:20px; }
+.flight-growth .eyebrow { margin:0 0 12px; }
+.recognition-rewards > p:last-child { margin:12px 0 0; line-height:1.5; color:var(--muted); font-size:14px; }
+.recognized-bird { display:flex; gap:12px; align-items:center; }
+.recognized-bird p { margin:0; }
+.recognized-bird strong, .recognized-bird span { display:block; line-height:1.5; }
+.recognized-bird span { color:var(--green); }
+.recognition-art { width:68px; height:68px; position:relative; flex-shrink:0; }
+.recognition-art .bird-small { position:absolute; width:180px; height:170px; left:50%; top:50%; margin:0; transform:translate(-50%,-50%) scale(.38); }
+.flight-badges { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:16px; }
+.flight-badges article { display:flex; gap:12px; align-items:center; }
+.flight-badges article > span { font-size:30px; }
+.flight-badges h3 { font-family:Fraunces,serif; font-size:21px; margin:0 0 4px; }
+.flight-badges p { margin:0; line-height:1.5; font-size:13px; }
+.results-card > .unlock-goal, .results-card > .flight-saved-note { font-size:14px; line-height:1.5; margin:16px 0; }
+.flight-result-actions { margin-top:20px; }
+.flight-result-actions .primary-button { width:100%; min-height:56px; margin:0; }
+.next-flight-note { font-size:13px; color:var(--muted); margin:10px 0 16px; }
+.flight-secondary-actions { display:flex; flex-wrap:wrap; justify-content:center; gap:10px; }
+.flight-secondary-actions .review-button { flex:1 1 230px; margin:0; min-height:48px; padding:12px; border-radius:14px; background:var(--paper); border:1px solid var(--line); color:var(--green); font-weight:700; }
+.flight-secondary-actions .text-button { flex-basis:100%; min-height:44px; padding:12px; }
+.practice-flight { max-width:430px; margin:0 0 24px; }
+.next-adventure .adventure-note { font-size:13px; color:var(--muted); }
+@media(max-width:699px) {
+  .game-screen { padding:12px 16px 24px; }
+  .game-screen .progress-track { margin-top:6px; }
+  .game-screen .game-prompt { padding:12px 0; }
+  .game-screen .game-prompt .eyebrow { margin:0; }
+  .game-screen .game-prompt h2 { font-size:28px; margin:3px 0 10px; }
+  .game-screen .sound-button { padding:10px 14px; border-radius:16px; }
+  .game-screen .sound-icon { width:40px; height:40px; }
+  .game-screen .bird-options { gap:8px; grid-template-columns:repeat(2,minmax(0,1fr)); }
+  .game-screen .bird-option { min-height:128px; padding:4px 8px 8px; border-radius:18px; }
+  .game-screen .option-art { height:88px; margin:0; }
+  .game-screen .option-art .bird-small { position:absolute; width:180px; height:170px; left:50%; top:50%; margin:0; transform:translate(-50%,-50%) scale(.54); }
+  .game-screen .option-art::after { bottom:0; width:64px; }
+  .game-screen .bird-option > span { min-height:30px; margin:2px auto 0; font-size:13px; align-items:center; }
+  .game-screen .answer-card { margin-top:10px; padding:12px; border-radius:18px; }
+  .answer-summary { gap:10px; }
+  .answer-status { font-size:14px; }
+  .answer-summary .answer-reveal { font-size:13px; }
+  .answer-next { padding:12px 14px; font-size:14px; gap:10px; }
+  .answer-field-note { padding-top:12px; margin-top:12px; }
+  .answer-field-note h3 { font-size:21px; }
+  .results-screen { padding:12px 16px 24px; }
+  .results-card { margin-top:8px; }
+  .flight-celebration { padding:16px 8px; }
+  .flight-celebration .eyebrow { font-size:10px; }
+  .results-card .unlock-card { grid-template-columns:100px minmax(0,1fr); padding:16px; gap:12px; }
+  .results-card .unlock-bird-art { width:100px; height:110px; }
+  .results-card .unlock-bird-art .bird-small { transform:translate(-50%,-50%) scale(.63); }
+  .results-card .unlock-copy h3 { font-size:24px; }
+  .recognition-rewards, .badge-rewards { padding:16px; }
+  .flight-badges { grid-template-columns:1fr; gap:18px; }
+}
+@media(prefers-reduced-motion:reduce) {
+  .game-screen .answer-card, .game-screen .correct-option, .results-screen .unlock-card { animation:none; }
+}
+@media(max-width:699px) {
+  .game-screen .correct-option .bird-illustration { animation-name:flight-bird-hop; }
+}
+@keyframes flight-bird-hop {
+  0%,100% { transform:translate(-50%,-50%) scale(.54); }
+  35% { transform:translate(-50%,calc(-50% - 12px)) scale(.54) rotate(-2deg); }
+  65% { transform:translate(-50%,calc(-50% + 2px)) scale(.54) rotate(1deg); }
+}
+@media(prefers-reduced-motion:reduce) {
+  .game-screen .correct-option .bird-illustration { animation:none; }
+}
+
+/* Keep the page color beneath the shared clouds; cards stay above them. */
+.learn-title-row { display:flex; align-items:center; justify-content:space-between; gap:16px; }
+.learn-title-row h1 { min-width:0; }
+.learn-header-bird { flex:0 0 160px; height:120px; position:relative; pointer-events:none; }
+.bird-facing-left { transform:scaleX(-1); }
+.learn-header-bird .bird-illustration { position:absolute; width:180px; height:170px; margin:0; left:50%; top:50%; transform:translate(-50%,-50%) scale(.8); }
+@media(max-width:600px) {
+  .learn-title-row { gap:8px; }
+  .learn-title-row h1 { font-size:clamp(32px,9vw,38px); }
+  .learn-header-bird { flex-basis:78px; height:78px; }
+  .learn-header-bird .bird-illustration { transform:translate(-50%,-50%) scale(.44); }
+}
+
+.practice-entry { min-width:0; }
+.practice-entry .practice-card { width:100%; height:auto; }
+.practice-recording-count { display:block; font-size:12px; color:var(--muted); margin-top:6px; font-weight:500; }
+.practice-another-recording { width:100%; margin-top:8px; min-height:44px; padding:10px 12px; border:1px solid var(--line); border-radius:14px; color:var(--green); background:var(--paper); font-weight:700; font-size:14px; }
+.practice-entry .practice-bird-art { position:relative; }
+.practice-entry .practice-bird-art .bird-small { position:absolute; width:180px; height:170px; left:50%; top:50%; margin:0; transform:translate(-50%,-50%) scale(.58); }
+@media(max-width:699px) {
+  .practice-entry .practice-bird-art .bird-small { transform:translate(-50%,-50%) scale(.52); }
+}
+
+.song-rewards { padding:20px; margin:14px 0; background:#e5ead4; border:1px solid var(--line); border-radius:22px; text-align:left; }
+.song-reward { display:flex; gap:12px; align-items:center; margin:12px 0; }
+.song-reward h3 { margin:0 0 6px; font-family:Fraunces,serif; font-size:24px; }
+.song-reward p, .song-rewards > p:last-child { font-size:14px; line-height:1.5; }
+.song-reward .review-button { margin:0; }
+.practice-song-status { font-size:12px; color:var(--green); line-height:1.4; margin:8px 4px 0; }
+
+.library-workbench { max-width:1100px; }
+.library-source { display:grid; grid-template-columns:150px minmax(0,1fr); gap:20px; align-items:center; }
+.library-source label { margin:12px 0; }
+.library-actions { display:flex; flex-wrap:wrap; align-items:center; gap:12px; margin:16px 0; }
+.library-workbench .library-check { display:flex; flex-direction:row; align-items:center; gap:10px; font-size:14px; line-height:1.5; }
+.library-check input { width:22px; height:22px; flex-shrink:0; min-height:0; }
+.library-fields { display:grid; grid-template-columns:1fr 1fr; gap:20px; margin:18px 0; }
+.library-attribution { border-top:1px solid var(--line); padding-top:16px; color:var(--muted); }
+.library-grid { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:14px; }
+.library-grid article { padding:16px; border:1px solid var(--line); border-radius:16px; background:#e8eddf; min-width:0; }
+.library-grid h3 { overflow-wrap:anywhere; font-family:Fraunces,serif; margin:0; font-size:21px; }
+.library-grid audio { width:100%; margin:12px 0; }
+@media(max-width:760px) { .library-grid { grid-template-columns:repeat(2,minmax(0,1fr)); }.library-source { grid-template-columns:90px minmax(0,1fr);gap:12px; }.library-fields { grid-template-columns:1fr;gap:12px; } }
+@media(max-width:480px) { .library-source { grid-template-columns:1fr; }.library-source>.collection-art { display:none; }.library-grid { grid-template-columns:1fr; }.library-actions>button { flex:1; }.library-workbench .world-header h1 { font-size:38px; } }
+.waveform-times label, .waveform-times input { min-width:0; }
+.waveform-times input { width:100%; }
+@media(max-width:650px) { .waveform-times { grid-template-columns:repeat(2,minmax(0,1fr)); } }

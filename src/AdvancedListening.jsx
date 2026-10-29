@@ -1,7 +1,7 @@
 import {masteredByEar} from './listening-mastery';
 import {useEffect,useRef,useState} from 'react';
 import {birds} from './data/birds';
-import {recognition,shuffle} from './progress';
+import {recognition,shuffle,planAdvancedTargets} from './progress';
 import {earnNestCredit,nestDay,readNest,NEST_KEY,attemptTime} from './nest-progress';
 const KEY='birdsong-advanced-listening-v1';
 function read(){try{return JSON.parse(localStorage.getItem(KEY)||'[]');}catch{return [];}}
@@ -11,7 +11,7 @@ export default function AdvancedListening({history,onHome}){
  const audio=useRef(null),context=useRef(null),generation=useRef(0),cache=useRef(new Map());
  useEffect(()=>()=>{generation.current++;audio.current?.stop();context.current?.close();},[]);
  function stop(){generation.current++;try{audio.current?.stop();}catch{/* already ended */}audio.current=null;setLoading(false);}
- function begin(){stop();const targets=shuffle(Array.from({length:6},(_,i)=>pool[i%pool.length]));setRounds(targets.map(b=>({bird:b,options:shuffle([b,...shuffle((mode==='close'?pool:birds).filter(x=>x.id!==b.id)).slice(0,mode==='close'?1:3)])})));setIndex(0);setHeard(false);setAnswer(null);setScore(0);setStatus('');}
+ function begin(){stop();const targets=planAdvancedTargets(pool);setRounds(targets.map(b=>({bird:b,options:shuffle([b,...shuffle((mode==='close'?pool:birds).filter(x=>x.id!==b.id)).slice(0,mode==='close'?1:3)])})));setIndex(0);setHeard(false);setAnswer(null);setScore(0);setStatus('');}
  async function play(){stop();const token=generation.current;setLoading(true);try{context.current??=new AudioContext();await context.current.resume();const b=rounds[index].bird;let buffer=cache.current.get(b.id);if(!buffer){const response=await fetch(b.audio);if(!response.ok)throw new Error();buffer=await context.current.decodeAudioData(await response.arrayBuffer());cache.current.set(b.id,buffer);}if(token!==generation.current)return;const segment=loudest(buffer,mode==='short'?1.5:3),source=context.current.createBufferSource(),gain=context.current.createGain();source.buffer=buffer;source.connect(gain);gain.connect(context.current.destination);const now=context.current.currentTime;gain.gain.setValueAtTime(0,now);gain.gain.linearRampToValueAtTime(.8,now+.02);gain.gain.setValueAtTime(.8,now+Math.max(.02,segment.length-.03));gain.gain.linearRampToValueAtTime(0,now+segment.length);audio.current=source;source.onended=()=>{if(generation.current===token){audio.current=null;setLoading(false);}};source.start(now,segment.start,segment.length);setHeard(true);}catch{if(token===generation.current){setLoading(false);setStatus('This recording couldn’t load. Try again or start a new round.');}}}
  function choose(id){if(answer||!heard)return;stop();const correct=id===rounds[index].bird.id,next=[...attempts,{birdId:rounds[index].bird.id,mode,correct,date:attemptTime()}];try{localStorage.setItem(KEY,JSON.stringify(next));setAttempts(next);setAnswer(id);setScore(s=>s+Number(correct));}catch{setStatus('Your progress couldn’t save. Please try again.');}}
  function finish(){stop();if(score>=5){try{const before=readNest(),next=earnNestCredit(before,`listen:${nestDay()}`);localStorage.setItem(NEST_KEY,JSON.stringify(next));setStatus(`You scored ${score}/6.${next.credits>before.credits?' An extra Pip species change is yours!':' Today’s listening change token is already yours.'}`);}catch{setStatus('Challenge complete. Your browser couldn’t save the change token.');}}else setStatus(`${score}/6. A little more listening, a little more familiar.`);setRounds([]);}

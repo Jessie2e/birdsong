@@ -130,14 +130,18 @@ export default function OutdoorListening({ onHome, BirdArt, onPractice }) {
       } catch { meterContext.current?.close(); meterContext.current = null; }
       if (!mounted.current) { releaseMic(); return; }
       const chunks = [];
+      let captureFailed = false;
       let capture;try{capture=new MediaRecorder(input,recorderOptions(MediaRecorder));}catch{capture=new MediaRecorder(input);}recorder.current = capture;
       setMicDetails(details=>({...details,format:capture.mimeType,bitrate:capture.audioBitsPerSecond||null}));
       capture.ondataavailable = event => { if (event.data.size) chunks.push(event.data); };
-      capture.onerror = () => { releaseMic(); setStatus('ready'); setMessage('Recording stopped unexpectedly. Please try again.'); };
+      capture.onerror = () => { captureFailed = true; releaseMic(); if (!mounted.current) return; setStatus('ready'); setMessage('Recording stopped unexpectedly. Please try again.'); };
       capture.onstop = () => {
-        releaseMic(); if (!mounted.current) return;
+        releaseMic(); if (!mounted.current || captureFailed) return;
         const blob = new Blob(chunks, {type:capture.mimeType}); blobRef.current = blob;
-        setWaveform([]); setDuration(0); setQuality(null); setClip(URL.createObjectURL(blob)); setStatus('ready'); setMessage('Recording ready. Next, tap Find birds, then play to watch your flock.');
+        setWaveform([]); setDuration(0); setQuality(null); setClip(URL.createObjectURL(blob));
+        // Both Stop and the 45-second limit finish here. Release the mic before analysis.
+        if (ready.current) void analyze(blob);
+        else { setStatus('idle'); setMessage('Recording saved for this visit. Load your listening kit, then tap Find birds.'); }
       };
       capture.start(); setSeconds(0); setStatus('recording'); setMessage('Listening… microphone turns off when you stop.');
       timer.current = setInterval(() => setSeconds(value => value + 1), 1000);
@@ -179,7 +183,7 @@ export default function OutdoorListening({ onHome, BirdArt, onPractice }) {
       <div aria-label="Outdoor recording">
       <span className="listening-symbol" aria-hidden="true">♪</span>
       <h2>{status === 'recording' ? `Listening · ${seconds}s / 45s` : '1 · Record birdsong'}</h2>
-      <p>Audio stays on this device. Recording starts only when you tap Record.</p><label className="mic-mode">Microphone level mode<select aria-label="Microphone level mode" value={micMode} disabled={busy} onChange={event=>setMicMode(event.target.value)}><option value="natural">Natural · no automatic level boost</option><option value="automatic">Automatic level · compare if playback is quiet</option></select></label><p className="world-small-note">Start with a 5–10 second recording, then replay it. If the recording sounds much quieter than the birds, try Automatic level on your next recording. Browser support varies.</p>
+      <p>Audio stays on this device. Tap Record, then Stop—we’ll automatically find possible birds for you.</p><label className="mic-mode">Microphone level mode<select aria-label="Microphone level mode" value={micMode} disabled={busy} onChange={event=>setMicMode(event.target.value)}><option value="natural">Natural · no automatic level boost</option><option value="automatic">Automatic level · compare if playback is quiet</option></select></label><p className="world-small-note">Start with a 5–10 second recording, then replay it. If the recording sounds much quieter than the birds, try Automatic level on your next recording. Browser support varies.</p>
       <p role="status" aria-live="polite">{clip && matches !== null ? '' : message || 'Load your listening kit once, then record a 3–45 second call.'}</p>
       {status === 'recording' && <div className="recording-level"><label htmlFor="live-recording-level">Microphone level · {liveLevel < -50 ? 'Low recorded level' : liveLevel > -12 ? 'Very loud' : 'Receiving sound'}</label><meter id="live-recording-level" min="-80" max="0" low="-50" high="-12" optimum="-28" value={Math.max(-80,liveLevel)} /><small>Strongest sound this recording: {Math.round(livePeak)} dBFS. This is recorded volume, not a bird detector or a judgment of how loud the birds are outside.</small></div>}
       {!modelReady ? <button className="primary-button" disabled={status === 'loading'} onClick={load}>{status === 'loading' ? 'Loading…' : 'Load listening kit'} <span>↓</span></button> : <>
